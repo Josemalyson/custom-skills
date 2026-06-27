@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{TOPIC}} — Explainer</title>
+  <meta name="description" content="Explainer técnico sobre {{TOPIC}}, otimizado para uma única leitura.">
+  <style>
+    :root {
+      --bg:#fafaf9; --bg-elevated:#fff; --bg-muted:#f4f4f3; --border:#e7e7e5;
+      --text:#18181b; --text-muted:#6b6b70; --text-subtle:#9ca3af;
+      --accent:#0f766e; --accent-bg:#ccfbf1; --accent-text:#134e4a;
+      --warning:#b45309; --warning-bg:#fef3c7;
+      --font-sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+      --font-mono:ui-monospace,"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
+      --radius-md:.375rem; --radius-lg:.5rem;
+      --shadow-focus:0 0 0 3px rgba(15,118,110,.25);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#0f0f10; --bg-elevated:#18181b; --bg-muted:#27272a; --border:#2d2d31;
+        --text:#fafafa; --text-muted:#a1a1aa; --text-subtle:#71717a;
+        --accent:#5eead4; --accent-bg:#134e4a; --accent-text:#ccfbf1;
+        --warning:#fcd34d; --warning-bg:#451a03; }
+    }
+    @media (prefers-reduced-motion: reduce) { *,*::before,*::after { transition-duration:.01ms!important; } }
+    *,*::before,*::after { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family:var(--font-sans); line-height:1.65; -webkit-font-smoothing:antialiased; }
+
+    .layout { display:grid; grid-template-columns: 240px minmax(0,1fr); gap:2rem; max-width:90rem; margin:0 auto; padding:2.5rem 1.5rem; }
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } nav.toc { position:static; max-height:none; } }
+
+    nav.toc { position:sticky; top:1rem; align-self:start; max-height:calc(100vh - 2rem); overflow:auto; font-size:.875rem; padding-right:.5rem; }
+    nav.toc .label { text-transform:uppercase; font-size:.7rem; letter-spacing:.08em; color:var(--text-subtle); font-weight:600; margin:0 0 .5rem; }
+    nav.toc ol { list-style:none; padding:0; margin:0; counter-reset:toc; }
+    nav.toc li { counter-increment:toc; margin:.25rem 0; }
+    nav.toc a { color:var(--text-muted); text-decoration:none; display:block; padding:.25rem 0 .25rem 1.75rem; position:relative; border-left:2px solid transparent; transition:color 150ms,border-color 150ms; }
+    nav.toc a::before { content: counter(toc, decimal-leading-zero); position:absolute; left:.25rem; color:var(--text-subtle); font-variant-numeric:tabular-nums; }
+    nav.toc a:hover, nav.toc a.active { color:var(--accent); border-left-color:var(--accent); }
+
+    main { min-width:0; max-width:72ch; }
+    header.doc-header h1 { margin:0 0 .5rem; font-size:2.25rem; line-height:1.15; letter-spacing:-.02em; }
+    header.doc-header .subtitle { color:var(--text-muted); font-size:1.125rem; margin:0 0 .25rem; }
+    header.doc-header .meta { color:var(--text-subtle); font-size:.875rem; margin:0 0 2.5rem; }
+    header.doc-header .meta time { font-variant-numeric:tabular-nums; }
+
+    .tldr { background:var(--accent-bg); color:var(--accent-text); border-left:3px solid var(--accent); padding:1.25rem 1.5rem; border-radius:var(--radius-lg); margin-bottom:2.5rem; }
+    .tldr h2 { margin:0 0 .5rem; font-size:.75rem; text-transform:uppercase; letter-spacing:.08em; }
+    .tldr p { margin:0; font-size:1rem; }
+
+    section { margin-bottom:2.5rem; scroll-margin-top:1.5rem; }
+    section h2 { font-size:1.5rem; margin:0 0 1rem; letter-spacing:-.01em; }
+    section h3 { font-size:1.125rem; margin:1.5rem 0 .75rem; color:var(--text-muted); }
+
+    code { font-family:var(--font-mono); font-size:.9em; background:var(--bg-muted); padding:.125em .375em; border-radius:.25rem; }
+    pre { font-family:var(--font-mono); font-size:.875rem; background:var(--bg-muted); padding:1rem 1.25rem; border-radius:var(--radius-md); overflow-x:auto; line-height:1.55; margin:0; }
+    pre code { background:transparent; padding:0; font-size:inherit; }
+
+    .tabs { border:1px solid var(--border); border-radius:var(--radius-md); overflow:hidden; margin:1rem 0; background:var(--bg-elevated); }
+    .tabs-nav { display:flex; border-bottom:1px solid var(--border); background:var(--bg-muted); overflow-x:auto; }
+    .tabs-nav button { all:unset; padding:.625rem 1rem; font-size:.8125rem; font-weight:500; color:var(--text-muted); cursor:pointer; border-bottom:2px solid transparent; transition:all 150ms; white-space:nowrap; }
+    .tabs-nav button:hover { color:var(--text); }
+    .tabs-nav button[aria-selected="true"] { color:var(--accent); border-bottom-color:var(--accent); background:var(--bg-elevated); }
+    .tabs-nav button:focus-visible { outline:none; box-shadow:var(--shadow-focus) inset; }
+    .tab-panel { display:none; }
+    .tab-panel[data-active="true"] { display:block; }
+    .tab-panel pre { border-radius:0; background:var(--bg-elevated); }
+
+    figure.diagram { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem; margin:1.5rem 0; }
+    figure.diagram svg { width:100%; height:auto; display:block; }
+    figure.diagram figcaption { font-size:.8125rem; color:var(--text-muted); text-align:center; margin-top:.75rem; }
+
+    .pitfalls { background:var(--warning-bg); border-left:3px solid var(--warning); padding:1rem 1.25rem; border-radius:var(--radius-md); margin:1.5rem 0; }
+    .pitfalls h3 { margin:0 0 .5rem; color:var(--warning); font-size:.875rem; text-transform:uppercase; letter-spacing:.04em; }
+    .pitfalls ul { margin:0; padding-left:1.25rem; }
+    .pitfalls li { margin:.375rem 0; font-size:.9375rem; }
+
+    dl.glossary { display:grid; grid-template-columns: minmax(8rem, 12rem) 1fr; gap:.5rem 1.25rem; margin:0; padding:1.25rem; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-md); }
+    dl.glossary dt { font-weight:600; color:var(--accent); font-size:.875rem; padding-top:.125rem; }
+    dl.glossary dd { margin:0; font-size:.9375rem; color:var(--text-muted); }
+    @media (max-width: 600px) { dl.glossary { grid-template-columns: 1fr; gap:.25rem; } dl.glossary dt { padding-top:.5rem; } }
+
+    .further-reading { list-style:none; padding:0; }
+    .further-reading li { padding:.625rem 0; border-bottom:1px solid var(--border); font-size:.9375rem; }
+    .further-reading li:last-child { border-bottom:none; }
+    .further-reading a { color:var(--accent); text-decoration:none; font-weight:500; }
+    .further-reading a:hover { text-decoration:underline; }
+    .further-reading .src { color:var(--text-subtle); font-size:.8125rem; margin-left:.5rem; }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <nav class="toc" aria-label="Sumário">
+    <p class="label">Sumário</p>
+    <ol>
+      <li><a href="#contexto" class="active">Contexto e motivação</a></li>
+      <li><a href="#mental-model">Modelo mental</a></li>
+      <li><a href="#walkthrough">Walkthrough</a></li>
+      <li><a href="#comparison">Comparação com alternativas</a></li>
+      <li><a href="#pitfalls">Armadilhas comuns</a></li>
+      <li><a href="#glossary">Glossário</a></li>
+      <li><a href="#further">Further reading</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="doc-header">
+      <h1>{{TOPIC}}</h1>
+      <p class="subtitle">{{ONE_LINE_DESCRIPTION}}</p>
+      <p class="meta">Para: {{AUDIENCE}} · Tempo de leitura: ~{{MINUTES}} min · <time datetime="{{ISO_DATE}}">{{DATE}}</time></p>
+    </header>
+
+    <aside class="tldr">
+      <h2>TL;DR</h2>
+      <p>{{ONE_PARAGRAPH_SUMMARY_WITH_THE_TAKEAWAY}}</p>
+    </aside>
+
+    <section id="contexto">
+      <h2>Contexto e motivação</h2>
+      <p>Por que esse conceito existe. Qual problema concreto ele resolve. O que existia antes e por que era insuficiente.</p>
+      <p>Inclua um exemplo de cenário real (do domínio do leitor) para ancorar o restante do texto.</p>
+    </section>
+
+    <section id="mental-model">
+      <h2>Modelo mental</h2>
+      <p>A intuição em uma frase: <em>"{{ONE_SENTENCE_INTUITION}}"</em>.</p>
+
+      <figure class="diagram" aria-label="Diagrama do conceito">
+        <svg viewBox="0 0 600 240" role="img" aria-labelledby="diag-title">
+          <title id="diag-title">Diagrama: fluxo principal de {{TOPIC}}</title>
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+          <g fill="none" stroke="currentColor" stroke-width="1.5" color="var(--text-muted)">
+            <rect x="20" y="90" width="120" height="60" rx="6"/>
+            <rect x="240" y="90" width="120" height="60" rx="6"/>
+            <rect x="460" y="90" width="120" height="60" rx="6"/>
+            <line x1="140" y1="120" x2="240" y2="120" marker-end="url(#arrow)"/>
+            <line x1="360" y1="120" x2="460" y2="120" marker-end="url(#arrow)"/>
+          </g>
+          <g fill="currentColor" font-family="var(--font-sans)" font-size="13" text-anchor="middle" color="var(--text)">
+            <text x="80" y="125">Entrada</text>
+            <text x="300" y="125">Processo</text>
+            <text x="520" y="125">Saída</text>
+          </g>
+        </svg>
+        <figcaption>Fluxo de alto nível — substitua pelos passos reais.</figcaption>
+      </figure>
+
+      <p>Liste 3–4 invariantes que sempre valem. Se uma invariante quebra, normalmente é bug.</p>
+    </section>
+
+    <section id="walkthrough">
+      <h2>Walkthrough</h2>
+      <p>Implementação mínima em três linguagens. Mostre o caminho feliz primeiro; trate erros depois.</p>
+
+      <div class="tabs" data-tabs>
+        <div class="tabs-nav" role="tablist" aria-label="Linguagens de implementação">
+          <button role="tab" id="tab-py" aria-controls="panel-py" aria-selected="true">Python</button>
+          <button role="tab" id="tab-ts" aria-controls="panel-ts" aria-selected="false">TypeScript</button>
+          <button role="tab" id="tab-go" aria-controls="panel-go" aria-selected="false">Go</button>
+        </div>
+        <div role="tabpanel" id="panel-py" class="tab-panel" data-active="true" aria-labelledby="tab-py"><pre><code># Implementação mínima em Python
+def example():
+    return "..."</code></pre></div>
+        <div role="tabpanel" id="panel-ts" class="tab-panel" aria-labelledby="tab-ts"><pre><code>// Implementação mínima em TypeScript
+export function example(): string {
+  return "...";
+}</code></pre></div>
+        <div role="tabpanel" id="panel-go" class="tab-panel" aria-labelledby="tab-go"><pre><code>// Implementação mínima em Go
+func example() string {
+  return "..."
+}</code></pre></div>
+      </div>
+    </section>
+
+    <section id="comparison">
+      <h2>Comparação com alternativas</h2>
+      <table>
+        <thead>
+          <tr><th>Aspecto</th><th>{{TOPIC}}</th><th>{{ALT_A}}</th><th>{{ALT_B}}</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Quando usar</td><td>...</td><td>...</td><td>...</td></tr>
+          <tr><td>Custo operacional</td><td>...</td><td>...</td><td>...</td></tr>
+          <tr><td>Latência típica</td><td>...</td><td>...</td><td>...</td></tr>
+          <tr><td>Maturidade</td><td>...</td><td>...</td><td>...</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="pitfalls">
+      <h2>Armadilhas comuns</h2>
+      <div class="pitfalls">
+        <h3>Cuidado</h3>
+        <ul>
+          <li><strong>Armadilha 1:</strong> descrição de uma página + como mitigar.</li>
+          <li><strong>Armadilha 2:</strong> "funciona em dev, quebra em prod por causa de X" — explicar.</li>
+          <li><strong>Armadilha 3:</strong> sintoma observável → causa raiz.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="glossary">
+      <h2>Glossário</h2>
+      <dl class="glossary">
+        <dt>Termo A</dt><dd>Definição em uma frase, sem jargão circular.</dd>
+        <dt>Termo B</dt><dd>Definição em uma frase.</dd>
+        <dt>Termo C</dt><dd>Definição em uma frase.</dd>
+      </dl>
+    </section>
+
+    <section id="further">
+      <h2>Further reading</h2>
+      <ul class="further-reading">
+        <li><a href="#">Fonte primária — paper/RFC/docs oficiais</a><span class="src">autor, ano</span></li>
+        <li><a href="#">Implementação de referência em código aberto</a><span class="src">github.com/...</span></li>
+        <li><a href="#">Post de blog com benchmark real</a><span class="src">engenharia da empresa X</span></li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<script>
+  // Tabs (acessível via teclado)
+  document.querySelectorAll('[data-tabs]').forEach(container => {
+    const tabs = container.querySelectorAll('[role="tab"]');
+    const panels = container.querySelectorAll('[role="tabpanel"]');
+    const activate = (idx) => {
+      tabs.forEach((t, i) => t.setAttribute('aria-selected', i === idx));
+      panels.forEach((p, i) => p.setAttribute('data-active', i === idx));
+      tabs[idx].focus();
+    };
+    tabs.forEach((tab, idx) => {
+      tab.addEventListener('click', () => activate(idx));
+      tab.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') { e.preventDefault(); activate((idx + 1) % tabs.length); }
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); activate((idx - 1 + tabs.length) % tabs.length); }
+      });
+    });
+  });
+
+  // TOC ativo conforme scroll (IntersectionObserver)
+  const links = document.querySelectorAll('nav.toc a');
+  const targets = [...links].map(a => document.querySelector(a.getAttribute('href')));
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const idx = targets.indexOf(entry.target);
+        links.forEach(l => l.classList.remove('active'));
+        if (idx >= 0) links[idx].classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  targets.forEach(t => t && io.observe(t));
+</script>
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{DECK_TITLE}}</title>
+  <meta name="description" content="{{DECK_DESCRIPTION}}">
+  <style>
+    :root {
+      --bg:#0f0f10; --bg-elevated:#18181b; --bg-muted:#27272a; --border:#2d2d31;
+      --text:#fafafa; --text-muted:#a1a1aa; --text-subtle:#71717a;
+      --accent:#5eead4; --accent-bg:#134e4a; --accent-text:#ccfbf1;
+      --font-sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+      --font-mono:ui-monospace,"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
+      --slide-w: 1280px;
+      --slide-h: 720px;
+    }
+    /* Decks costumam ficar melhor em dark — sem media query light por padrão.
+       Se preferir light, troque os tokens acima. */
+
+    *,*::before,*::after { box-sizing:border-box; }
+    body { margin:0; background:#000; color:var(--text); font-family:var(--font-sans); -webkit-font-smoothing:antialiased; overflow:hidden; }
+
+    /* === Modo apresentação: um slide visível por vez, 16:9 fit-to-viewport === */
+    .deck { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; }
+    .slide {
+      width: var(--slide-w);
+      height: var(--slide-h);
+      background: var(--bg);
+      padding: 4rem 5rem;
+      display: none;
+      flex-direction: column;
+      transform-origin: center;
+      position: relative;
+      box-shadow: 0 0 0 1px var(--border);
+    }
+    .slide[data-active="true"] { display:flex; }
+    .slide h1 { font-size: 4rem; margin: 0 0 1.5rem; line-height:1.05; letter-spacing:-.02em; }
+    .slide h2 { font-size: 2.5rem; margin: 0 0 1.5rem; line-height:1.15; letter-spacing:-.015em; }
+    .slide h3 { font-size: 1.25rem; color: var(--accent); margin: 0 0 .5rem; text-transform:uppercase; letter-spacing:.08em; font-weight:600; }
+    .slide p, .slide li { font-size: 1.5rem; line-height: 1.5; color: var(--text); }
+    .slide ul { padding-left: 1.5rem; }
+    .slide li { margin-bottom: .75rem; }
+    .slide code { font-family: var(--font-mono); background: var(--bg-muted); padding: .15em .4em; border-radius: .25rem; font-size: .9em; }
+    .slide pre { font-family: var(--font-mono); background: var(--bg-muted); padding: 1.25rem 1.5rem; border-radius: .5rem; font-size: 1.125rem; line-height: 1.5; overflow-x: auto; }
+
+    /* HUD (canto inferior) */
+    .hud { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); display:flex; gap:.75rem; align-items:center; font-family: var(--font-mono); font-size:.75rem; color: var(--text-subtle); background: rgba(0,0,0,.5); padding:.5rem .875rem; border-radius: 999px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+    .hud .counter { font-variant-numeric: tabular-nums; }
+    .hud .hint { color: var(--text-subtle); }
+    .hud kbd { font-family: var(--font-mono); background: var(--bg-muted); color: var(--text-muted); padding:.1rem .35rem; border-radius:.25rem; font-size:.7rem; }
+
+    /* Speaker notes (mostrar com 's') */
+    .notes { position: fixed; right: 1rem; top: 1rem; max-width: 22rem; background: rgba(0,0,0,.85); border:1px solid var(--border); border-radius:.5rem; padding: 1rem 1.25rem; font-size:.875rem; line-height:1.5; color: var(--text-muted); display:none; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+    .notes[data-visible="true"] { display: block; }
+    .notes h4 { margin: 0 0 .5rem; font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; color: var(--accent); }
+
+    /* Progress bar */
+    .progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: transparent; }
+    .progress > div { height: 100%; background: var(--accent); transition: width 200ms ease-out; }
+
+    /* === Layouts comuns === */
+    .layout-title { justify-content:center; }
+    .layout-title h1 { font-size: 5rem; }
+    .layout-title .subtitle { font-size: 1.75rem; color: var(--text-muted); }
+    .layout-title .footer { position:absolute; bottom: 4rem; left: 5rem; color: var(--text-subtle); font-size: 1rem; }
+
+    .layout-quote { justify-content:center; text-align:center; }
+    .layout-quote blockquote { font-size: 2.5rem; line-height: 1.3; margin: 0; max-width: 60ch; font-weight:300; letter-spacing:-.01em; }
+    .layout-quote blockquote::before { content: "“"; color: var(--accent); display:block; font-size: 6rem; line-height: .8; margin-bottom: 1rem; }
+    .layout-quote cite { display:block; margin-top: 2rem; font-size: 1.125rem; color: var(--text-muted); font-style:normal; }
+
+    .layout-two { display:grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items:center; }
+    .layout-two h2 { font-size: 2.25rem; }
+
+    .layout-image figure { margin: 0; }
+    .layout-image figcaption { margin-top: 1rem; color: var(--text-muted); font-size: 1rem; }
+
+    /* === Modo impressão: tudo visível, página por slide === */
+    @media print {
+      @page { size: 1280px 720px; margin: 0; }
+      body { background: white; overflow: visible; }
+      .deck { position: static; display: block; }
+      .slide { display: flex !important; page-break-after: always; width: 1280px; height: 720px; box-shadow: none; }
+      .slide:last-child { page-break-after: auto; }
+      .hud, .notes, .progress { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="progress" aria-hidden="true"><div id="progress-bar"></div></div>
+
+<div class="deck" id="deck">
+
+  <!-- ============ SLIDE 1: TÍTULO ============ -->
+  <section class="slide layout-title" data-active="true" data-notes="Slide de abertura — apresentar o problema em uma frase e o público-alvo.">
+    <h3>{{TRACK_OR_TAG}}</h3>
+    <h1>{{DECK_TITLE}}</h1>
+    <p class="subtitle">{{SUBTITLE_ONE_LINE}}</p>
+    <p class="footer">{{SPEAKER}} · {{VENUE_OR_AUDIENCE}} · {{DATE}}</p>
+  </section>
+
+  <!-- ============ SLIDE 2: AGENDA ============ -->
+  <section class="slide" data-notes="Não passar mais de 30s aqui — só sinalizar o arco.">
+    <h3>Agenda</h3>
+    <h2>O que vamos cobrir</h2>
+    <ul>
+      <li>Contexto e problema</li>
+      <li>Abordagem proposta</li>
+      <li>Trade-offs e armadilhas</li>
+      <li>Próximos passos</li>
+    </ul>
+  </section>
+
+  <!-- ============ SLIDE 3: PROBLEMA ============ -->
+  <section class="slide" data-notes="Ancorar com um número concreto: latência X, custo Y, incidente Z.">
+    <h3>Problema</h3>
+    <h2>{{PROBLEM_HEADLINE}}</h2>
+    <p>{{ONE_PARAGRAPH_PROBLEM_DESCRIPTION}}</p>
+  </section>
+
+  <!-- ============ SLIDE 4: QUOTE / NÚMERO ============ -->
+  <section class="slide layout-quote" data-notes="Pausar 2s depois de mostrar o número.">
+    <blockquote>{{KEY_NUMBER_OR_QUOTE}}</blockquote>
+    <cite>— {{SOURCE}}</cite>
+  </section>
+
+  <!-- ============ SLIDE 5: DUAS COLUNAS (antes/depois) ============ -->
+  <section class="slide layout-two" data-notes="Mostrar o delta entre antes e depois; manter eixos comparáveis se for número.">
+    <div>
+      <h3>Antes</h3>
+      <h2>{{BEFORE_HEADLINE}}</h2>
+      <p>{{BEFORE_DESCRIPTION}}</p>
+    </div>
+    <div>
+      <h3>Depois</h3>
+      <h2>{{AFTER_HEADLINE}}</h2>
+      <p>{{AFTER_DESCRIPTION}}</p>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 6: DIAGRAMA ============ -->
+  <section class="slide" data-notes="Apontar o componente novo; o resto é pano de fundo.">
+    <h3>Arquitetura</h3>
+    <h2>Como funciona</h2>
+    <svg viewBox="0 0 1000 360" style="width:100%; height:auto; max-height:60vh;" role="img" aria-label="Diagrama de arquitetura">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-muted)"/>
+        </marker>
+      </defs>
+      <g fill="none" stroke="var(--text-muted)" stroke-width="2">
+        <rect x="40"  y="140" width="200" height="80" rx="8" fill="var(--bg-elevated)"/>
+        <rect x="400" y="140" width="200" height="80" rx="8" fill="var(--bg-elevated)" stroke="var(--accent)" stroke-width="3"/>
+        <rect x="760" y="140" width="200" height="80" rx="8" fill="var(--bg-elevated)"/>
+        <line x1="240" y1="180" x2="400" y2="180" marker-end="url(#ar)"/>
+        <line x1="600" y1="180" x2="760" y2="180" marker-end="url(#ar)"/>
+      </g>
+      <g fill="var(--text)" font-family="var(--font-sans)" font-size="20" text-anchor="middle">
+        <text x="140" y="186">Cliente</text>
+        <text x="500" y="186" fill="var(--accent)">Componente novo</text>
+        <text x="860" y="186">Backend</text>
+      </g>
+    </svg>
+  </section>
+
+  <!-- ============ SLIDE 7: CÓDIGO ============ -->
+  <section class="slide" data-notes="Falar sobre o trecho destacado. Não ler o código linha por linha.">
+    <h3>Implementação</h3>
+    <h2>O ponto crítico</h2>
+<pre><code>// Substitua pelo trecho real — manter ≤12 linhas
+async function process(input) {
+  const validated = schema.parse(input);
+  const result = await pipeline.run(validated);
+  return result;
+}</code></pre>
+  </section>
+
+  <!-- ============ SLIDE 8: TRADE-OFFS ============ -->
+  <section class="slide" data-notes="Mostrar que você pensou nos custos. Audiência técnica espera isso.">
+    <h3>Trade-offs</h3>
+    <h2>O que estamos trocando</h2>
+    <ul>
+      <li><strong>Ganhamos:</strong> {{GAIN}}</li>
+      <li><strong>Perdemos:</strong> {{LOSS}}</li>
+      <li><strong>Quando NÃO usar:</strong> {{ANTI_PATTERN}}</li>
+    </ul>
+  </section>
+
+  <!-- ============ SLIDE 9: TAKEAWAYS ============ -->
+  <section class="slide" data-notes="Última oportunidade de fixar a mensagem. Três bullets, no máximo.">
+    <h3>Takeaways</h3>
+    <h2>Se você esquecer tudo, lembre disso</h2>
+    <ul>
+      <li>{{TAKEAWAY_1}}</li>
+      <li>{{TAKEAWAY_2}}</li>
+      <li>{{TAKEAWAY_3}}</li>
+    </ul>
+  </section>
+
+  <!-- ============ SLIDE 10: PERGUNTAS / CONTATO ============ -->
+  <section class="slide layout-title" data-notes="Deixar contato e referência. Pode ficar nesse slide durante o Q&A.">
+    <h1>Perguntas?</h1>
+    <p class="subtitle">{{SPEAKER}} — {{CONTACT}}</p>
+    <p class="footer">Referências e código completo: {{LINK}}</p>
+  </section>
+
+</div>
+
+<aside class="notes" id="notes" aria-live="polite">
+  <h4>Speaker notes</h4>
+  <p id="notes-body">—</p>
+</aside>
+
+<div class="hud" aria-hidden="true">
+  <span class="counter"><span id="cur">1</span> / <span id="total">10</span></span>
+  <span class="hint">·</span>
+  <span class="hint"><kbd>←</kbd> <kbd>→</kbd> navegar · <kbd>s</kbd> notas · <kbd>f</kbd> fullscreen · <kbd>p</kbd> imprimir</span>
+</div>
+
+<script>
+  const deck = document.getElementById('deck');
+  const slides = [...deck.querySelectorAll('.slide')];
+  const total = slides.length;
+  const curEl = document.getElementById('cur');
+  const totalEl = document.getElementById('total');
+  const progressBar = document.getElementById('progress-bar');
+  const notesEl = document.getElementById('notes');
+  const notesBody = document.getElementById('notes-body');
+  let idx = 0;
+  let notesVisible = false;
+
+  totalEl.textContent = total;
+
+  function fitDeck() {
+    // Escala 1280x720 para caber no viewport mantendo aspect ratio
+    const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    slides.forEach(s => s.style.transform = `scale(${scale})`);
+  }
+  window.addEventListener('resize', fitDeck);
+  fitDeck();
+
+  function render() {
+    slides.forEach((s, i) => s.setAttribute('data-active', i === idx));
+    curEl.textContent = idx + 1;
+    progressBar.style.width = `${((idx + 1) / total) * 100}%`;
+    notesBody.textContent = slides[idx].dataset.notes || '—';
+    // Atualiza hash para navegação via URL
+    history.replaceState(null, '', `#${idx + 1}`);
+  }
+
+  function go(delta) {
+    idx = Math.max(0, Math.min(total - 1, idx + delta));
+    render();
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); go(1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(-1); }
+    else if (e.key === 'Home') { idx = 0; render(); }
+    else if (e.key === 'End') { idx = total - 1; render(); }
+    else if (e.key.toLowerCase() === 's') { notesVisible = !notesVisible; notesEl.setAttribute('data-visible', notesVisible); }
+    else if (e.key.toLowerCase() === 'f') {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen();
+    }
+    else if (e.key.toLowerCase() === 'p') { window.print(); }
+    else if (/^[0-9]$/.test(e.key)) { const n = parseInt(e.key, 10); if (n >= 1 && n <= total) { idx = n - 1; render(); } }
+  });
+
+  // Click to advance (qualquer área que não seja link/botão)
+  deck.addEventListener('click', (e) => {
+    if (e.target.closest('a, button')) return;
+    const rect = deck.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    go(x < rect.width / 3 ? -1 : 1);
+  });
+
+  // Suporte a hash inicial (#3 abre no slide 3)
+  const initial = parseInt(location.hash.slice(1), 10);
+  if (initial >= 1 && initial <= total) { idx = initial - 1; }
+  render();
+</script>
+</body>
+</html>

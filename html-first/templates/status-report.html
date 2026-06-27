@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Status — {{TEAM_NAME}} — {{PERIOD}}</title>
+  <style>
+    :root { --bg:#fafaf9; --bg-elevated:#fff; --bg-muted:#f4f4f3; --border:#e7e7e5; --text:#18181b; --text-muted:#6b6b70; --accent:#0f766e; --success:#15803d; --warning:#b45309; --danger:#b91c1c; --font-sans:ui-sans-serif,system-ui,sans-serif; --radius-md:.375rem; }
+    @media (prefers-color-scheme: dark) { :root { --bg:#0f0f10; --bg-elevated:#18181b; --bg-muted:#27272a; --border:#2d2d31; --text:#fafafa; --text-muted:#a1a1aa; --accent:#5eead4; } }
+    *,*::before,*::after { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family:var(--font-sans); line-height:1.6; }
+    main { max-width:80ch; margin:0 auto; padding:2.5rem 1.5rem; }
+    header h1 { margin:0 0 .25rem; }
+    header .meta { color:var(--text-muted); font-size:.875rem; margin:0 0 2rem; }
+    h2 { margin-top:2.5rem; font-size:1.25rem; }
+    .tldr { background:var(--bg-elevated); border-left:3px solid var(--accent); padding:1rem 1.25rem; border-radius:var(--radius-md); }
+    .tldr ul { margin:.5rem 0 0; padding-left:1.25rem; }
+    .items { list-style:none; padding:0; }
+    .item { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-md); padding:.75rem 1rem; margin-bottom:.5rem; display:grid; grid-template-columns: 1fr auto; gap:.5rem; align-items:center; }
+    .item .title a { color:var(--accent); text-decoration:none; }
+    .item .title a:hover { text-decoration:underline; }
+    .badge { font-size:.7rem; padding:.125rem .5rem; border-radius:.25rem; font-weight:600; text-transform:uppercase; letter-spacing:.04em; }
+    .badge.done { background:#dcfce7; color:var(--success); }
+    .badge.in-flight { background:#fef3c7; color:var(--warning); }
+    .badge.slipped { background:#fee2e2; color:var(--danger); }
+    @media (prefers-color-scheme: dark) {
+      .badge.done { background:#14532d; color:#86efac; }
+      .badge.in-flight { background:#451a03; color:#fcd34d; }
+      .badge.slipped { background:#3d1212; color:#fca5a5; }
+    }
+    .progress { width:120px; height:6px; background:var(--bg-muted); border-radius:3px; overflow:hidden; }
+    .progress > div { height:100%; background:var(--accent); }
+    .chart-container { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-md); padding:1.25rem; }
+    .chart-container svg { width:100%; height:auto; }
+    .chart-label { font-size:.875rem; color:var(--text-muted); margin-bottom:.5rem; }
+    .mentions p { margin:.25rem 0; font-size:.875rem; }
+  </style>
+</head>
+<body>
+
+<main>
+
+  <header>
+    <h1>{{TEAM_NAME}} — Status</h1>
+    <p class="meta">{{PERIOD}} · Owner: {{OWNER}}</p>
+  </header>
+
+  <section class="tldr">
+    <strong>TL;DR</strong>
+    <ul>
+      <li>{{TLDR_1}}</li>
+      <li>{{TLDR_2}}</li>
+      <li>{{TLDR_3}}</li>
+      <li>{{TLDR_4}}</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Shipped</h2>
+    <ul class="items">
+      <li class="item">
+        <div class="title"><a href="{{LINK_1}}">{{SHIPPED_1}}</a></div>
+        <span class="badge done">Done</span>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>In flight</h2>
+    <ul class="items">
+      <li class="item">
+        <div class="title">{{INFLIGHT_1}}</div>
+        <div class="progress" title="65%"><div style="width:65%"></div></div>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Slipped / at risk</h2>
+    <ul class="items">
+      <li class="item">
+        <div class="title">{{SLIPPED_1}}<br><small>{{SLIPPED_1_REASON}}</small></div>
+        <span class="badge slipped">Slipped</span>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Key metric: {{METRIC_NAME}}</h2>
+    <div class="chart-container">
+      <div class="chart-label">{{METRIC_DESCRIPTION}}</div>
+      <svg viewBox="0 0 400 200" aria-label="Chart: {{METRIC_NAME}}">
+        <!-- eixos -->
+        <line x1="40" y1="170" x2="380" y2="170" stroke="var(--border)"/>
+        <line x1="40" y1="20" x2="40" y2="170" stroke="var(--border)"/>
+        <!-- linha -->
+        <polyline points="40,140 80,135 120,120 160,115 200,100 240,95 280,90 320,85 360,80"
+                  stroke="var(--accent)" stroke-width="2" fill="none"/>
+        <!-- pontos -->
+        <circle cx="40" cy="140" r="3" fill="var(--accent)"/>
+        <circle cx="80" cy="135" r="3" fill="var(--accent)"/>
+        <circle cx="120" cy="120" r="3" fill="var(--accent)"/>
+        <circle cx="160" cy="115" r="3" fill="var(--accent)"/>
+        <circle cx="200" cy="100" r="3" fill="var(--accent)"/>
+        <circle cx="240" cy="95" r="3" fill="var(--accent)"/>
+        <circle cx="280" cy="90" r="3" fill="var(--accent)"/>
+        <circle cx="320" cy="85" r="3" fill="var(--accent)"/>
+        <circle cx="360" cy="80" r="3" fill="var(--accent)"/>
+        <!-- labels eixo X -->
+        <text x="40" y="190" font-size="10" text-anchor="middle" fill="var(--text-muted)">Seg</text>
+        <text x="200" y="190" font-size="10" text-anchor="middle" fill="var(--text-muted)">Qui</text>
+        <text x="360" y="190" font-size="10" text-anchor="middle" fill="var(--text-muted)">Dom</text>
+      </svg>
+    </div>
+  </section>
+
+  <section class="mentions">
+    <h2>Mentions</h2>
+    <p>🙌 {{MENTION_1}}</p>
+    <p>🙌 {{MENTION_2}}</p>
+  </section>
+
+</main>
+
+</body>
+</html>

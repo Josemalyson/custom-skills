@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Comparação: {{TOPIC}}</title>
+  <style>
+    /* Copie tokens base de _base.html */
+    :root { --bg:#fafaf9; --bg-elevated:#fff; --bg-muted:#f4f4f3; --border:#e7e7e5; --text:#18181b; --text-muted:#6b6b70; --accent:#0f766e; --font-sans:ui-sans-serif,system-ui,sans-serif; --font-mono:ui-monospace,"JetBrains Mono",monospace; --space-3:.75rem; --space-4:1rem; --space-6:1.5rem; --space-8:2rem; --radius-md:.375rem; --transition:150ms ease-out; }
+    @media (prefers-color-scheme: dark) { :root { --bg:#0f0f10; --bg-elevated:#18181b; --bg-muted:#27272a; --border:#2d2d31; --text:#fafafa; --text-muted:#a1a1aa; --accent:#5eead4; } }
+    *,*::before,*::after { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family:var(--font-sans); line-height:1.6; }
+    main { max-width:100ch; margin:0 auto; padding:var(--space-8) var(--space-6); }
+    h1 { margin:0 0 var(--space-3); letter-spacing:-.011em; }
+    .criteria { color:var(--text-muted); margin-bottom:var(--space-8); }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:var(--space-6); }
+    .option { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-md); padding:var(--space-6); display:flex; flex-direction:column; }
+    .option h2 { margin:0 0 var(--space-3); font-size:1.125rem; }
+    .tagline { color:var(--text-muted); font-size:.875rem; margin-bottom:var(--space-4); }
+    .diagram { background:var(--bg-muted); border-radius:var(--radius-md); padding:var(--space-4); margin-bottom:var(--space-4); display:flex; align-items:center; justify-content:center; min-height:160px; }
+    .diagram svg { width:100%; height:auto; max-height:140px; }
+    .pros, .cons { margin:var(--space-3) 0; }
+    .pros h3, .cons h3 { font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; margin:0 0 var(--space-2); color:var(--text-muted); }
+    .pros li::marker { color:#15803d; }
+    .cons li::marker { color:#b91c1c; }
+    .option ul { margin:0; padding-left:var(--space-4); font-size:.875rem; }
+    .option ul li { margin-bottom:var(--space-2); }
+    details { margin-top:auto; padding-top:var(--space-4); border-top:1px dashed var(--border); }
+    details summary { cursor:pointer; color:var(--accent); font-size:.875rem; font-weight:500; }
+    pre { font-family:var(--font-mono); font-size:.8rem; background:var(--bg-muted); padding:var(--space-3); border-radius:var(--radius-md); overflow-x:auto; margin-top:var(--space-3); }
+    aside.rec { margin-top:var(--space-8); padding:var(--space-6); background:var(--bg-elevated); border-left:3px solid var(--accent); border-radius:var(--radius-md); }
+    aside.rec h2 { margin:0 0 var(--space-3); font-size:1.125rem; }
+  </style>
+</head>
+<body>
+
+<main>
+  <header>
+    <h1>Comparação: {{TOPIC}}</h1>
+    <p class="criteria">Critérios de avaliação: <em>{{CRITERIA}}</em></p>
+  </header>
+
+  <section class="grid">
+
+    <article class="option">
+      <h2>Opção 1: {{NAME_1}}</h2>
+      <p class="tagline">{{TAGLINE_1}}</p>
+      <div class="diagram">
+        <svg viewBox="0 0 200 100" aria-label="Diagrama Opção 1">
+          <!-- diagrama inline -->
+        </svg>
+      </div>
+      <div class="pros">
+        <h3>Quando escolher</h3>
+        <ul><li>{{PRO_1_1}}</li><li>{{PRO_1_2}}</li></ul>
+      </div>
+      <div class="cons">
+        <h3>Quando não escolher</h3>
+        <ul><li>{{CON_1_1}}</li><li>{{CON_1_2}}</li></ul>
+      </div>
+      <details>
+        <summary>Code sketch</summary>
+        <pre><code>// snippet ilustrativo</code></pre>
+      </details>
+    </article>
+
+    <!-- Repetir o <article class="option"> para cada opção (3-6 ideal) -->
+
+  </section>
+
+  <aside class="rec">
+    <h2>Recomendação</h2>
+    <p>{{RECOMMENDATION_RATIONALE}}</p>
+  </aside>
+</main>
+
+</body>
+</html>

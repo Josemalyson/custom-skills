@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Plano de Implementação: {{FEATURE_NAME}}</title>
+  <style>
+    :root { --bg:#fafaf9; --bg-elevated:#fff; --bg-muted:#f4f4f3; --border:#e7e7e5; --text:#18181b; --text-muted:#6b6b70; --accent:#0f766e; --success:#15803d; --warning:#b45309; --danger:#b91c1c; --info:#1d4ed8; --font-sans:ui-sans-serif,system-ui,sans-serif; --font-mono:ui-monospace,monospace; --radius-md:.375rem; --shadow-focus: 0 0 0 3px rgba(15,118,110,.25); }
+    @media (prefers-color-scheme: dark) { :root { --bg:#0f0f10; --bg-elevated:#18181b; --bg-muted:#27272a; --border:#2d2d31; --text:#fafafa; --text-muted:#a1a1aa; --accent:#5eead4; } }
+    *,*::before,*::after { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family:var(--font-sans); line-height:1.6; }
+    .layout { display:grid; grid-template-columns:240px 1fr; gap:2rem; max-width:1100px; margin:0 auto; padding:2rem 1.5rem; }
+    @media (max-width: 800px) { .layout { grid-template-columns:1fr; } nav.toc { position:static !important; } }
+
+    nav.toc { position:sticky; top:1rem; align-self:start; font-size:.875rem; padding-right:1rem; border-right:1px solid var(--border); }
+    nav.toc h2 { font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); margin:0 0 .75rem; }
+    nav.toc ol { list-style:none; padding:0; margin:0; }
+    nav.toc li { margin:.5rem 0; }
+    nav.toc a { color:var(--text-muted); text-decoration:none; }
+    nav.toc a:hover, nav.toc a.active { color:var(--accent); }
+
+    main h1 { margin:0 0 .5rem; }
+    main .meta { color:var(--text-muted); margin:0 0 2rem; font-size:.875rem; }
+    main h2 { margin-top:3rem; padding-top:.5rem; }
+    main section { margin-bottom:2rem; }
+
+    .tldr { background:var(--bg-elevated); border-left:3px solid var(--accent); padding:1rem 1.25rem; border-radius:var(--radius-md); }
+    .tldr ul { margin:.5rem 0 0; padding-left:1.25rem; }
+
+    .timeline { display:block; background:var(--bg-muted); padding:1rem; border-radius:var(--radius-md); overflow-x:auto; }
+    .timeline svg { width:100%; min-width:600px; height:140px; }
+
+    .arch { background:var(--bg-muted); padding:1rem; border-radius:var(--radius-md); }
+    .arch svg { width:100%; height:auto; }
+
+    .mockups { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:1rem; }
+    .mockup { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; }
+    .mockup-label { font-size:.75rem; color:var(--text-muted); margin-bottom:.5rem; }
+
+    pre { font-family:var(--font-mono); font-size:.85rem; background:var(--bg-muted); padding:1rem; border-radius:var(--radius-md); overflow-x:auto; }
+    code { font-family:var(--font-mono); font-size:.9em; background:var(--bg-muted); padding:.125em .375em; border-radius:.25rem; }
+
+    table { width:100%; border-collapse:collapse; margin:1rem 0; }
+    th, td { text-align:left; padding:.75rem; border-bottom:1px solid var(--border); }
+    th { font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); }
+    .risk-high { color:var(--danger); font-weight:600; }
+    .risk-med { color:var(--warning); font-weight:600; }
+    .risk-low { color:var(--success); font-weight:600; }
+
+    .dod ul { list-style:none; padding:0; }
+    .dod li::before { content:"☐ "; color:var(--text-muted); margin-right:.25rem; }
+    .dod li.done::before { content:"☑ "; color:var(--success); }
+
+    .open-questions { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem 1.25rem; }
+    .open-questions ol { margin:.5rem 0 0; padding-left:1.25rem; }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <nav class="toc" aria-label="Sumário">
+    <h2>Sumário</h2>
+    <ol>
+      <li><a href="#tldr">TL;DR</a></li>
+      <li><a href="#timeline">Timeline</a></li>
+      <li><a href="#arch">Arquitetura</a></li>
+      <li><a href="#mockups">Mockups</a></li>
+      <li><a href="#code">Code excerpts</a></li>
+      <li><a href="#risks">Riscos</a></li>
+      <li><a href="#dod">Definition of Done</a></li>
+      <li><a href="#questions">Open Questions</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <h1>Plano de Implementação: {{FEATURE_NAME}}</h1>
+    <p class="meta">Owner: {{OWNER}} · Target: {{TARGET_DATE}} · Status: {{STATUS}}</p>
+
+    <section id="tldr">
+      <h2>TL;DR</h2>
+      <div class="tldr">
+        <ul>
+          <li>{{TLDR_1}}</li>
+          <li>{{TLDR_2}}</li>
+          <li>{{TLDR_3}}</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="timeline">
+      <h2>Timeline</h2>
+      <div class="timeline">
+        <svg viewBox="0 0 800 140" aria-label="Timeline de milestones">
+          <!-- Eixo -->
+          <line x1="40" y1="80" x2="760" y2="80" stroke="var(--border)" stroke-width="2"/>
+          <!-- Marcadores e barras (preencher) -->
+          <g class="milestone">
+            <rect x="60" y="60" width="140" height="40" fill="var(--accent)" opacity=".2" rx="4"/>
+            <text x="130" y="55" text-anchor="middle" font-size="11" fill="currentColor">M1: Foundation</text>
+            <text x="130" y="115" text-anchor="middle" font-size="10" fill="var(--text-muted)">W1-W2</text>
+          </g>
+          <!-- ... -->
+        </svg>
+      </div>
+    </section>
+
+    <section id="arch">
+      <h2>Arquitetura</h2>
+      <div class="arch">
+        <svg viewBox="0 0 800 400" aria-label="Diagrama de arquitetura">
+          <!-- componentes e setas -->
+        </svg>
+      </div>
+      <p>{{ARCH_NARRATIVE}}</p>
+    </section>
+
+    <section id="mockups">
+      <h2>Mockups</h2>
+      <div class="mockups">
+        <div class="mockup">
+          <div class="mockup-label">{{MOCKUP_1_LABEL}}</div>
+          <!-- sketch inline (SVG ou HTML) -->
+        </div>
+        <div class="mockup">
+          <div class="mockup-label">{{MOCKUP_2_LABEL}}</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="code">
+      <h2>Code excerpts</h2>
+      <p>{{CODE_CONTEXT_1}}</p>
+      <pre><code>// trecho crítico 1</code></pre>
+    </section>
+
+    <section id="risks">
+      <h2>Riscos</h2>
+      <table>
+        <thead><tr><th>Risco</th><th>Prob.</th><th>Impacto</th><th>Mitigação</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>{{RISK_1}}</td>
+            <td class="risk-high">Alto</td>
+            <td>{{RISK_1_IMPACT}}</td>
+            <td>{{RISK_1_MITIGATION}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="dod">
+      <h2>Definition of Done</h2>
+      <ul class="dod">
+        <li>{{DOD_1}}</li>
+        <li>{{DOD_2}}</li>
+      </ul>
+    </section>
+
+    <section id="questions">
+      <h2>Open Questions</h2>
+      <div class="open-questions">
+        <ol>
+          <li>{{Q_1}}</li>
+          <li>{{Q_2}}</li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+</div>
+
+<script>
+  // Scroll-spy simples no TOC
+  const links = document.querySelectorAll('nav.toc a');
+  const sections = [...links].map(l => document.querySelector(l.getAttribute('href')));
+  const setActive = () => {
+    const y = window.scrollY + 100;
+    let active = sections[0];
+    for (const s of sections) { if (s && s.offsetTop <= y) active = s; }
+    links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + (active?.id || '')));
+  };
+  window.addEventListener('scroll', setActive, { passive: true });
+  setActive();
+</script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PR Review: {{PR_TITLE}}</title>
+  <style>
+    :root { --bg:#fafaf9; --bg-elevated:#fff; --bg-muted:#f4f4f3; --border:#e7e7e5; --text:#18181b; --text-muted:#6b6b70; --accent:#0f766e; --diff-add-bg:#e6ffec; --diff-add-border:#28a745; --diff-del-bg:#ffeef0; --diff-del-border:#d73a49; --sev-blocker:#b91c1c; --sev-suggestion:#1d4ed8; --sev-nit:#6b6b70; --sev-info:#0f766e; --font-sans:ui-sans-serif,system-ui,sans-serif; --font-mono:ui-monospace,"JetBrains Mono",monospace; --radius-md:.375rem; }
+    @media (prefers-color-scheme: dark) { :root { --bg:#0f0f10; --bg-elevated:#18181b; --bg-muted:#27272a; --border:#2d2d31; --text:#fafafa; --text-muted:#a1a1aa; --diff-add-bg:#0d3318; --diff-del-bg:#3d1212; } }
+    *,*::before,*::after { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family:var(--font-sans); line-height:1.55; }
+    .container { max-width:1300px; margin:0 auto; padding:1.5rem; }
+
+    header { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-md); padding:1.5rem; margin-bottom:1.5rem; }
+    header h1 { margin:0 0 .75rem; font-size:1.5rem; }
+    header h1 code { font-size:.95em; }
+    .pr-meta { display:flex; gap:1.5rem; flex-wrap:wrap; font-size:.875rem; color:var(--text-muted); }
+    .pr-meta > div strong { color:var(--text); }
+    .risk-high { color:var(--sev-blocker); font-weight:600; }
+    .risk-medium { color:#b45309; font-weight:600; }
+    .risk-low { color:var(--sev-info); font-weight:600; }
+
+    nav.findings { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem 1.5rem; margin-bottom:1.5rem; }
+    nav.findings h2 { font-size:.875rem; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); margin:0 0 .5rem; }
+    nav.findings ol { margin:0; padding-left:1.25rem; font-size:.875rem; }
+    nav.findings a { text-decoration:none; }
+    .sev { display:inline-block; font-size:.7rem; font-weight:600; text-transform:uppercase; padding:.125rem .5rem; border-radius:.25rem; margin-right:.5rem; letter-spacing:.04em; }
+    .sev.blocker { background:#fee2e2; color:var(--sev-blocker); }
+    .sev.suggestion { background:#dbeafe; color:var(--sev-suggestion); }
+    .sev.nit { background:var(--bg-muted); color:var(--sev-nit); }
+    .sev.info { background:#ccfbf1; color:var(--sev-info); }
+    @media (prefers-color-scheme: dark) {
+      .sev.blocker { background:#3d1212; color:#fca5a5; }
+      .sev.suggestion { background:#1e293b; color:#93c5fd; }
+      .sev.nit { background:var(--bg-muted); color:#a1a1aa; }
+      .sev.info { background:#134e4a; color:#5eead4; }
+    }
+
+    article.file { margin-bottom:2rem; }
+    article.file h2 { font-size:1rem; margin:0 0 .5rem; padding:.75rem 1rem; background:var(--bg-elevated); border:1px solid var(--border); border-bottom:none; border-radius:var(--radius-md) var(--radius-md) 0 0; }
+    article.file h2 code { background:transparent; padding:0; font-size:.95em; }
+
+    .diff-row { display:grid; grid-template-columns:1fr 1fr 320px; gap:0; border:1px solid var(--border); border-radius:0 0 var(--radius-md) var(--radius-md); overflow:hidden; }
+    @media (max-width: 1000px) { .diff-row { grid-template-columns:1fr; } .annotations { border-top:1px solid var(--border); } }
+
+    .before, .after { padding:.75rem; font-family:var(--font-mono); font-size:.85rem; line-height:1.5; overflow-x:auto; background:var(--bg-muted); }
+    .before { border-right:1px solid var(--border); }
+    .line { display:block; padding:0 .5rem; min-height:1.5em; }
+    .line.add { background:var(--diff-add-bg); border-left:3px solid var(--diff-add-border); }
+    .line.del { background:var(--diff-del-bg); border-left:3px solid var(--diff-del-border); }
+    .line.context { color:var(--text-muted); }
+
+    .annotations { padding:.75rem; background:var(--bg-elevated); }
+    .annotation { padding:.75rem; border-radius:var(--radius-md); margin-bottom:.5rem; font-size:.875rem; border-left:3px solid var(--sev-nit); background:var(--bg-muted); }
+    .annotation.blocker { border-left-color:var(--sev-blocker); }
+    .annotation.suggestion { border-left-color:var(--sev-suggestion); }
+    .annotation.info { border-left-color:var(--sev-info); }
+    .annotation .line-ref { font-family:var(--font-mono); font-size:.75rem; color:var(--text-muted); margin-bottom:.25rem; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <h1>PR #{{PR_NUMBER}}: <code>{{PR_TITLE}}</code></h1>
+    <div class="pr-meta">
+      <div><strong>Author:</strong> {{AUTHOR}}</div>
+      <div><strong>Files:</strong> {{N_FILES}}</div>
+      <div><strong>Changes:</strong> +{{ADDITIONS}} / −{{DELETIONS}}</div>
+      <div><strong>Risk:</strong> <span class="risk-medium">{{RISK}}</span></div>
+    </div>
+  </header>
+
+  <nav class="findings" aria-label="Findings">
+    <h2>Findings ({{N_FINDINGS}})</h2>
+    <ol>
+      <li><span class="sev blocker">Blocker</span><a href="#f1">{{FINDING_1_TEXT}}</a></li>
+      <li><span class="sev suggestion">Suggestion</span><a href="#f2">{{FINDING_2_TEXT}}</a></li>
+      <li><span class="sev nit">Nit</span><a href="#f3">{{FINDING_3_TEXT}}</a></li>
+    </ol>
+  </nav>
+
+  <article class="file">
+    <h2><code>{{FILE_1_PATH}}</code></h2>
+    <div class="diff-row">
+      <div class="before" aria-label="Antes">
+<span class="line context">  1  function authenticate(token) {</span>
+<span class="line del">  2    if (!token) throw new Error('No token')</span>
+<span class="line context">  3    return verify(token)</span>
+<span class="line context">  4  }</span>
+      </div>
+      <div class="after" aria-label="Depois">
+<span class="line context">  1  function authenticate(token) {</span>
+<span class="line add">  2    if (!token) throw new AuthError('No token', 401)</span>
+<span class="line context">  3    return verify(token)</span>
+<span class="line context">  4  }</span>
+      </div>
+      <aside class="annotations" aria-label="Anotações">
+        <div id="f1" class="annotation blocker">
+          <div class="line-ref">L2</div>
+          <strong>Blocker:</strong> {{F1_BODY}}
+        </div>
+      </aside>
+    </div>
+  </article>
+
+  <!-- Repetir <article class="file"> por arquivo modificado -->
+
+</div>
+
+</body>
+</html>
