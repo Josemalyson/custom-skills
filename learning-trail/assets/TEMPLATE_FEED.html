@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="{idioma}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f1f5f9" media="(prefers-color-scheme: light)">
+  <title>Learning Trail — {Título}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" as="style" onload="this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"></noscript>
+  <style>
+    /* ── Design tokens ─────────────────────────────── */
+    :root {
+      --bg:           #f1f5f9;
+      --surface:      #ffffff;
+      --surface-2:    #f8fafc;
+      --border:       #e2e8f0;
+      --text:         #0f172a;
+      --text-muted:   #64748b;
+      --accent:       #6366f1;
+      --accent-light: #eef2ff;
+      --accent-text:  #4338ca;
+      --verified:     #059669;
+      --verified-bg:  #d1fae5;
+      --check-bg:     #fef9c3;
+      --check-border: #fde047;
+      --check-text:   #713f12;
+      --boss-bg:      #0f172a;
+      --boss-text:    #f1f5f9;
+      --boss-border:  #1e293b;
+      --boss-card:    #1e293b;
+      --radius:       12px;
+      --font: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    :root[data-theme="dark"] {
+        --bg:           #0f172a;
+        --surface:      #1e293b;
+        --surface-2:    #0f172a;
+        --border:       #334155;
+        --text:         #f1f5f9;
+        --text-muted:   #94a3b8;
+        --accent:       #818cf8;
+        --accent-light: #1e1b4b;
+        --accent-text:  #a5b4fc;
+        --verified:     #34d399;
+        --verified-bg:  #064e3b;
+        --check-bg:     #451a03;
+        --check-border: #78350f;
+        --check-text:   #fde68a;
+        --boss-bg:      #020617;
+        --boss-text:    #f1f5f9;
+        --boss-border:  #1e293b;
+        --boss-card:    #0f172a;
+        color-scheme: dark;
+    }
+
+    /* ── Reduced motion ────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
+    }
+
+    /* ── Reset & base ──────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 1rem;
+      line-height: 1.6;
+      padding-bottom: 5rem; /* space for bottom nav */
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── Layout ────────────────────────────────────── */
+    .app-shell { max-width: 600px; margin: 0 auto; background: var(--surface); min-height: 100svh; overscroll-behavior: contain; }
+
+    /* ── Top bar ───────────────────────────────────── */
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      background: color-mix(in srgb, var(--surface) 85%, transparent);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .top-bar-title {
+      font-size: 1rem;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .icon-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.25rem;
+      touch-action: manipulation;
+      transition: background 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+    .icon-btn:hover { background: var(--border); color: var(--text); }
+    .icon-btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* ── Feed ──────────────────────────────────────── */
+    .feed { display: flex; flex-direction: column; gap: 0; background: var(--bg); }
+
+    /* ── Station card ──────────────────────────────── */
+    .station { background: var(--surface); margin-bottom: 0.75rem; }
+
+    .station-header {
+      position: sticky;
+      top: 3.25rem; /* below top-bar */
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.875rem 1rem;
+      background: color-mix(in srgb, var(--surface) 90%, transparent);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+    }
+    .station-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.25rem 0.625rem;
+      border-radius: 9999px;
+      background: var(--accent-light);
+      color: var(--accent-text);
+      white-space: nowrap;
+    }
+    .station-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      text-wrap: balance;
+    }
+
+    /* ── Narrative ─────────────────────────────────── */
+    .narrative {
+      padding: 1rem;
+      font-size: 1rem;
+      line-height: 1.65;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Nerve card ────────────────────────────────── */
+    .nerve-card {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .nerve-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .nerve-author {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .verified-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--verified);
+      background: var(--verified-bg);
+      padding: 0.2rem 0.5rem;
+      border-radius: 9999px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .nerve-context {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+    .nerve-excerpt {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      font-style: italic;
+      background: var(--surface-2);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 0.75rem 0.875rem;
+      margin-bottom: 0.875rem;
+    }
+    .nerve-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      width: 100%;
+      padding: 0.625rem 1rem;
+      border-radius: 8px;
+      background: var(--accent-light);
+      color: var(--accent-text);
+      font-weight: 700;
+      font-size: 0.875rem;
+      text-decoration: none;
+      touch-action: manipulation;
+      transition: opacity 0.15s;
+    }
+    .nerve-link:hover { opacity: 0.85; }
+    .nerve-link:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* ── Check ─────────────────────────────────────── */
+    .check-box {
+      padding: 0.875rem 1rem;
+      background: var(--check-bg);
+      border-top: 2px solid var(--check-border);
+      color: var(--check-text);
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    .check-label {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 0.3rem;
+      display: block;
+    }
+
+    /* ── Boss Final ────────────────────────────────── */
+    .boss-section {
+      background: var(--boss-bg);
+      color: var(--boss-text);
+      padding: 1.5rem 1rem 2rem;
+    }
+    .boss-heading {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 0.375rem;
+      text-wrap: balance;
+    }
+    .boss-sub { font-size: 0.875rem; color: #94a3b8; margin-bottom: 1.25rem; }
+    .boss-question {
+      background: var(--boss-card);
+      border: 1px solid var(--boss-border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .boss-q-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #818cf8;
+      margin-bottom: 0.375rem;
+      display: block;
+    }
+    .boss-q-text { font-size: 0.9375rem; font-weight: 500; text-wrap: balance; }
+
+    /* ── Bottom nav ────────────────────────────────── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0.625rem 0 max(0.625rem, env(safe-area-inset-bottom));
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      z-index: 40;
+    }
+    .nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font);
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0.25rem 0.75rem;
+      border-radius: 8px;
+      touch-action: manipulation;
+      transition: color 0.15s;
+    }
+    .nav-btn:hover { color: var(--accent); }
+    .nav-btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .nav-btn span:first-child { font-size: 1.25rem; }
+
+    /* ── Skip link ─────────────────────────────────── */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 1rem;
+      z-index: 999;
+      padding: 0.5rem 1rem;
+      background: var(--accent);
+      color: white;
+      font-weight: 700;
+      border-radius: 0 0 8px 8px;
+    }
+    .skip-link:focus { top: 0; }
+    .skip-link:focus-visible { outline: 2px solid white; }
+  </style>
+</head>
+<body>
+
+  <a href="#main-feed" class="skip-link">Ir para o conteúdo</a>
+
+  <div class="app-shell">
+
+    <!-- Top bar -->
+    <header class="top-bar">
+      <h1 class="top-bar-title" translate="no">{Título}</h1>
+      <button
+        class="icon-btn"
+        id="theme-btn"
+        aria-label="Alternar modo escuro"
+        aria-pressed="false"
+        onclick="toggleTheme(this)"
+      >☀</button>
+    </header>
+
+    <!-- Feed principal -->
+    <main id="main-feed" class="feed">
+
+      <!-- ── ESTAÇÃO ── Repita este bloco para cada estação ── -->
+      <article class="station" id="estacao-1">
+
+        <header class="station-header">
+          <h2 class="station-title">{Título narrativo}</h2>
+          <span class="station-badge" aria-label="Estação 1">
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor" aria-hidden="true"><circle cx="4" cy="4" r="4"/></svg>
+            E&thinsp;1
+          </span>
+        </header>
+
+        <!-- Narrativa -->
+        <div class="narrative">
+          <p>{Parágrafo narrativo de 3–6 linhas. Conecta com a anterior e termina com tensão.}</p>
+        </div>
+
+        <!-- ── NERVO ── Repita este bloco para cada nervo ── -->
+        <section class="nerve-card" aria-label="Recurso validado: {Título do Recurso}">
+          <div class="nerve-header">
+            <span class="nerve-author">{Canal/Autor} &middot; {Duração/Tipo}</span>
+            <span class="verified-badge" aria-label="Validado">
+              ✓ Validado
+            </span>
+          </div>
+          <p class="nerve-context"><strong>Quando seguir:</strong> {contexto}</p>
+          <blockquote class="nerve-excerpt">&ldquo;{trecho}&rdquo;</blockquote>
+          <a
+            href="{url}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="nerve-link"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Acessar: <span translate="no">{Título do Recurso}</span>
+          </a>
+        </section>
+        <!-- ── FIM NERVO ── -->
+
+        <!-- Check de avanço -->
+        <div class="check-box" role="note" aria-label="Check de avanço">
+          <span class="check-label">&#9654; Check de avanço</span>
+          {Pergunta socrática binária}. Se não, reveja os nervos acima.
+        </div>
+
+      </article>
+      <!-- ── FIM ESTAÇÃO ── -->
+
+      <!-- ── BOSS FINAL ── -->
+      <section class="boss-section" id="boss-final" aria-labelledby="boss-heading">
+        <h2 id="boss-heading" class="boss-heading">&#9876; Boss Final</h2>
+        <p class="boss-sub">Sem gabarito. Responda mentalmente ou por escrito para provar retenção.</p>
+
+        <ol style="list-style: none; padding: 0;">
+          <!-- Repita para cada pergunta -->
+          <li class="boss-question">
+            <span class="boss-q-label">1. Conceitual</span>
+            <p class="boss-q-text">{Pergunta}</p>
+          </li>
+          <!-- Fim pergunta -->
+        </ol>
+      </section>
+
+      <!-- ── RECURSOS ADICIONAIS MULTIMODAIS ── -->
+      <section style="padding: 1.25rem 1rem; background: var(--surface); border-bottom: 1px solid var(--border);" aria-labelledby="feed-recursos-titulo">
+        <h3 id="feed-recursos-titulo" style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.75rem;">
+          Recursos Adicionais Multimodais
+        </h3>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+          Vídeos, podcasts, leituras, tutoriais, livros e sinais recentes validados que complementam a trilha.
+        </p>
+        <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.5rem;">
+          <li style="font-size: 0.875rem; display: flex; align-items: flex-start; gap: 0.5rem;">
+            <span aria-hidden="true" style="flex-shrink: 0;">🎥</span>
+            <span><a href="{url}" target="_blank" rel="noopener noreferrer" style="font-weight: 600; color: var(--accent-text);" translate="no">{Título do vídeo}</a> <span style="color: var(--text-muted);">— 🔍 validado: {trecho curto}</span></span>
+          </li>
+          <li style="font-size: 0.875rem; display: flex; align-items: flex-start; gap: 0.5rem;">
+            <span aria-hidden="true" style="flex-shrink: 0;">🎧</span>
+            <span><a href="{url}" target="_blank" rel="noopener noreferrer" style="font-weight: 600; color: var(--accent-text);" translate="no">{Título do podcast}</a> <span style="color: var(--text-muted);">— 🔍 validado: {trecho curto/timestamp}</span></span>
+          </li>
+          <li style="font-size: 0.875rem; display: flex; align-items: flex-start; gap: 0.5rem;">
+            <span aria-hidden="true" style="flex-shrink: 0;">🛠</span>
+            <span><a href="{url}" target="_blank" rel="noopener noreferrer" style="font-weight: 600; color: var(--accent-text);" translate="no">{Título do tutorial/lab}</a> <span style="color: var(--text-muted);">— 🔍 validado: {trecho curto}</span></span>
+          </li>
+          <li style="font-size: 0.875rem; display: flex; align-items: flex-start; gap: 0.5rem;">
+            <span aria-hidden="true" style="flex-shrink: 0;">🧵</span>
+            <span><a href="{url}" target="_blank" rel="noopener noreferrer" style="font-weight: 600; color: var(--accent-text);" translate="no">{Discussão recente}</a> <span style="color: var(--text-muted);">— 🔍 validado: {trecho curto + data}</span></span>
+          </li>
+        </ul>
+      </section>
+
+      <!-- ── PRÓXIMOS PASSOS ── -->
+      <section style="padding: 1.25rem 1rem; background: var(--surface); border-bottom: 1px solid var(--border);" aria-labelledby="feed-proximos-titulo">
+        <h3 id="feed-proximos-titulo" style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.75rem;">
+          Próximos Passos Sugeridos
+        </h3>
+        <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.5rem;">
+          <li style="font-size: 0.875rem;">
+            <a href="#" style="font-weight: 600; color: var(--accent-text);" translate="no">{Próximo tópico}</a> <span style="color: var(--text-muted);">— {1 linha do porquê}</span>
+          </li>
+        </ul>
+      </section>
+
+      <!-- ── AUDITORIA ── -->
+      <footer style="padding: 1rem; background: var(--surface); font-size: 0.8rem; color: var(--text-muted);" aria-label="Auditoria da trilha">
+        <p style="font-weight: 700; color: var(--text); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span translate="no">Trust by Inspection</span>
+        </p>
+        <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.2rem;">
+          <li>Candidatos inspecionados: {total_inspecionados}</li>
+          <li>Aprovados e validados: {M}&nbsp;nervos</li>
+          <li>Mix multimodal: {videos}&nbsp;vídeos, {audios}&nbsp;áudios/podcasts, {tutorials}&nbsp;tutoriais/labs, {recentes}&nbsp;fontes recentes, {books}&nbsp;livros</li>
+          <li>Lacunas declaradas: {lacunas}</li>
+          <li>Gerado por <code translate="no">learning-trail-skill</code></li>
+        </ul>
+      </footer>
+
+    </main>
+
+    <!-- Bottom nav -->
+    <nav class="bottom-nav" aria-label="Navegação rápida">
+      <button
+        class="nav-btn"
+        onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
+        aria-label="Ir ao topo"
+      >
+        <span aria-hidden="true">&#8679;</span>
+        <span>Topo</span>
+      </button>
+      <button
+        class="nav-btn"
+        onclick="document.getElementById('boss-final').scrollIntoView({ behavior: 'smooth' })"
+        aria-label="Ir ao boss final"
+      >
+        <span aria-hidden="true">&#9876;</span>
+        <span>Boss</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <script>
+    // Inicializa tema conforme preferência do sistema
+    (function () {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (prefersDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        const btn = document.getElementById('theme-btn');
+        if (btn) { btn.textContent = '☀'; btn.setAttribute('aria-pressed', 'true'); }
+      }
+    })();
+
+    function toggleTheme(btn) {
+      const isDark = btn.getAttribute('aria-pressed') === 'true';
+      btn.setAttribute('aria-pressed', String(!isDark));
+      btn.textContent = isDark ? '☾' : '☀';
+      if (isDark) {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    }
+  </script>
+</body>
+</html>

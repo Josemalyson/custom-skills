@@ -1,423 +1,153 @@
 ---
 name: learning-trail
-description: "Use esta skill SEMPRE que o usuário pedir para estudar, aprender, explorar, entender ou gerar uma trilha/aula/roadmap sobre um assunto. Gera um arquivo Markdown estruturado como narrativa linear de estações curtas (coluna vertebral) com recursos externos VALIDADOS POR CONTEÚDO (nervos). O agente atua como núcleo validador: lê/transcreve cada recurso antes de recomendá-lo, garantindo que cada link entregue exatamente o que promete. Triggers PT-BR: 'quero aprender X', 'me ensina X', 'gera trilha de X', 'estudar X', 'roadmap de X', 'aula de X'. Triggers EN: 'teach me X', 'learn X', 'study X', 'roadmap for X'. NÃO usar para: tarefas de código, debugging, perguntas factuais isoladas, conversa casual."
-version: 3.0
+description: Use esta skill SEMPRE que o usuário mencionar que deseja estudar, aprender, explorar, entender ou pedir uma trilha, aula ou roadmap sobre qualquer assunto, mesmo que não cite explicitamente "trilha de aprendizado". A skill cria um guia linear e multimodal com leitura, vídeos, podcasts/áudio, tutoriais práticos, livros e sinais recentes de comunidade como X/Reddit, todos avaliados rigorosamente por inspeção. O usuário pode escolher entre saída Markdown ou 4 templates HTML diferentes (completo, minimalista, timeline, feed mobile). Evite usá-la apenas para tarefas de código ou dúvidas pontuais, mas para qualquer jornada de aprendizado, acione-a imediatamente!
 ---
 
 # Learning Trail Generator
 
-Gera um arquivo `.md` no padrão **spine + nerves** com **validação atômica de recursos**.
+Bem-vindo à skill Learning Trail Generator. O seu objetivo aqui é ajudar o usuário a aprender um tema aprofundadamente. Para isso, você gerará um arquivo `.md` ou `.html` no padrão **spine + nerves** (espinha e nervos), no qual a maior força está em você validar e inspecionar cada recurso sugerido.
 
-## Arquitetura de confiança
+A trilha deve ser completa para aprendizado visual, prático, auditivo e textual. Dois links soltos não são uma trilha: use um mix multimodal de vídeos, podcasts/áudio, tutoriais práticos, artigos recentes, discussões qualificadas de X/Reddit e livros opcionais.
 
-Esta skill opera no modelo **trust by inspection**, não *trust by reputation*. Significa:
+## Arquitetura de Confiança (Trust by Inspection)
 
-- **Não** filtra fontes por whitelist estática antes da busca.
-- **Sim** valida o conteúdo real de cada candidato antes de recomendá-lo.
-- Cada recurso recomendado é uma **transação atômica**: ou foi inspecionado e aprovado, ou não entra na trilha. Sem nervos "meia-bomba".
+A essência desta skill é construir confiança através da inspeção do conteúdo real, e não apenas por reputação ou intuição. Por isso:
+- Nós não filtramos fontes usando whitelists estáticas. Qualquer fonte pode ser ótima se o conteúdo for bom.
+- Inspecionamos ativamente cada candidato a recurso (lendo o texto, transcrições ou PDFs) antes de incluí-lo na trilha. 
+- Cada recomendação é incluída apenas se puder ser validada como cobrindo o tema específico exigido, com o nível de profundidade correto.
+- Isso evita que o usuário receba links quebrados ou desatualizados, garantindo uma trilha sólida.
 
-Reputação histórica de uma fonte é usada apenas como tie-breaker entre candidatos equivalentes — nunca como filtro bloqueante. Um blog desconhecido pode ser excelente; um venue famoso pode estar desatualizado no subtópico específico.
+A reputação da fonte serve apenas como desempate, mas o conteúdo vem em primeiro lugar.
 
-## Metáfora operacional
+## O Modelo Mental
 
-Jogo de tabuleiro:
-- **Tabuleiro** = mapa da trilha (visível antes de começar)
-- **Casas** = estações de conhecimento (4 a 10 por trilha)
-- **Caminhos laterais** = nervos (recursos VALIDADOS de aprofundamento)
-- **Boss final** = 5 perguntas socráticas
+Pense na trilha como um jogo de tabuleiro:
+- **Tabuleiro:** O mapa da trilha, apresentado antes de começar.
+- **Casas (Estações):** A espinha dorsal do conhecimento (idealmente de 4 a 10 estações breves, ~5-10 min de leitura cada).
+- **Caminhos Laterais (Nervos):** Recursos validados para aprofundamento, alternando leitura, vídeo, áudio, comunidade e prática.
+- **Labs/Tutoriais:** Pequenas entregas práticas para fixar o conteúdo, mesmo em temas conceituais.
+- **Desafio Final:** Perguntas socráticas para auto-avaliação (sem gabaritos!).
 
-## Princípio fundamental
+## Como conduzir a sessão (Workflow)
 
-Você é o **núcleo validador**. Não escreve enciclopédia do tópico — escreve a **narrativa do raciocínio** (estações) e **prova** que cada recurso recomendado entrega o que promete (validação).
+Siga estas fases passo a passo.
 
-## Regras invioláveis
+### Fase 1 — Captura e Clarificação (Perguntas Iterativas)
 
-1. **PROIBIDO usar memória como fonte primária.** Todo conteúdo factual deve ser validado por busca web na sessão atual.
-2. **PROIBIDO recomendar recurso não-validado.** Se não conseguiu ler/transcrever, não entra.
-3. **Idioma detectado.** Detecte da requisição inicial e gere o arquivo inteiro nesse idioma.
-4. **Sem gabarito.** Checks e perguntas finais são socráticos.
-5. **Nada é imposto.** Projeto prático e próximo tópico são sempre perguntados.
-6. **Estações são pequenas.** 5-10 min de leitura cada. Maior que isso, quebre.
+Ao receber a solicitação de aprendizado, identifique o idioma do usuário.
+Antes de começar a pesquisa, **faça perguntas iterativas até entender totalmente o que o usuário deseja**. As perguntas devem cobrir:
 
----
+1. **Plano:** Ele prefere que você monte o plano automaticamente ou quer customizar (tamanho, foco teórico vs prático)?
+2. **Materiais:** Ele possui algum link, PDF ou material específico que gostaria de incluir na trilha?
+3. **Nível:** Qual o nível de profundidade desejado? (iniciante, intermediário, avançado)
+4. **Foco:** Prefere uma trilha mais teórica (conceitos, papers), prática (ferramentas, código) ou balanceada?
+5. **Extensão:** Quantas estações (tópicos) ele idealiza? (curta: 3-4, média: 5-7, longa: 8-10)
+6. **Modo de aprendizado:** Ele prefere mais vídeo, leitura, prática, áudio/podcast ou um mix balanceado?
 
-## Workflow do agente
+**Importante:** Não pergunte tudo de uma vez. Vá em sequência, adaptando as perguntas com base nas respostas anteriores. Se o usuário pedir para montar automaticamente, use o padrão balanceado: visual + prático + textual + áudio + comunidade recente.
 
-### Fase 1 — Captura e clarificação
+### Fase 2 — Busca Exploratória
 
-1. Receba o assunto e detecte o idioma.
-2. Pergunte interativamente:
-   - "Quer plano automático ou prefere customizar (nº de estações, foco em teoria/prática)?"
-   - "Tem fontes específicas que gostaria de incluir? (PDFs, livros, links, repositórios). Se sim, me passe agora."
+Realize uma busca ampla pelo assunto para entender o contexto geral e encontrar os melhores candidatos a materiais.
+- Procure os conceitos fundamentais, pré-requisitos e tópicos mais avançados para montar a ordem da trilha (a espinha).
+- Colete candidatos em quantidade suficiente para reprovar sem empobrecer a trilha. Para trilhas médias/longas, busque pelo menos 25-40 candidatos antes da validação.
 
-### Fase 2 — Mapeamento (busca exploratória)
+**Cobertura multimodal obrigatória:**
 
-Busca AMPLA, sem filtro de whitelist. Objetivo: ter universo grande de candidatos para validar depois.
+Direcione a busca exploratória para estes tipos de fonte. Não trate a lista como whitelist; mantenha o princípio de que o conteúdo vem em primeiro lugar.
 
-Execute nesta ordem:
+1. **Leitura profunda** — documentação oficial, papers, RFCs, whitepapers, posts técnicos extensos e livros.
+2. **Vídeo** — aulas, talks, conference talks, demos e walkthroughs. Priorize transcrição, capítulos ou descrição verificável.
+3. **Áudio/podcast** — episódios, entrevistas e painéis com especialistas. Priorize transcrição, show notes ou timestamps.
+4. **Tutoriais práticos/labs** — codelabs, quickstarts, notebooks, repositórios didáticos, hands-on guides, exercises e projetos pequenos.
+5. **Comunidade recente** — X/Twitter, Reddit, Hacker News, GitHub Discussions/Issues e newsletters recentes. Use para capturar debate atual, armadilhas, mudanças recentes e prática de campo; não use como única fonte de verdade.
+6. **Livros** — livros seminais, livros modernos e capítulos específicos. Valide por sumário, sample, reviews qualificadas ou citações confiáveis.
 
-1. **Validação do tópico:** terminologia atual, escopo, estado.
-2. **Mapeamento da narrativa:** "[topic] explained step by step", "[topic] fundamentals", "how to teach [topic]".
-3. **Pré-requisitos:** "prerequisites for [topic]" — alimenta o DAG anterior.
-4. **Próximos passos:** "advanced topics after [topic]" — alimenta o DAG posterior.
-5. **Candidatos a recurso (busca larga):**
-   - Vídeos: mínimo 8 candidatos. NÃO filtre por canal nesta fase.
-   - Papers: mínimo 6 candidatos. Busque em arXiv, Google Scholar, Semantic Scholar.
-   - Tutoriais: mínimo 8 candidatos. NÃO filtre por blog/site.
-   - Livros: mínimo 6 candidatos.
+**Metas mínimas de candidatos antes da validação:**
 
-Se o usuário forneceu fontes próprias, elas vão **direto para a Fase 3** (validação), pulando esta fase para esses itens.
+- 6-10 leituras profundas.
+- 6-10 vídeos.
+- 3-6 podcasts/áudios quando o tema permitir.
+- 5-8 tutoriais práticos/labs.
+- 5-10 sinais recentes de comunidade, preferencialmente dos últimos 30-180 dias para tecnologia ativa.
+- 3-5 livros ou capítulos relevantes.
 
-### Fase 3 — Desenho da espinha (estações)
+### Fase 3 — Desenho da Espinha (Estações)
 
-Defina sequência de estações com base na pesquisa exploratória:
+Determine a sequência lógica do aprendizado. 
+Se for uma ferramenta prática, talvez 4-5 estações sejam suficientes. Se for um conceito complexo, 7-10. Mais que 10 pode ser exaustivo; sugira quebrar em sub-trilhas.
+Cada estação precisa de uma narrativa: introduza o problema, desenvolva a ideia, mostre limitações e conclua.
 
-| Tipo de tópico | Nº típico de estações |
-|---|---|
-| Skill prática (ex: "Dockerfile") | 4-5 |
-| Conceito fundamental (ex: "O que é IA") | 5-7 |
-| Tecnologia concreta (ex: "Kubernetes") | 7-10 |
-| Padrão arquitetural (ex: "Event Sourcing") | 6-8 |
-| Tema teórico denso (ex: "Teorema CAP") | 5-7 |
+Inclua uma **entrega prática** por estação sempre que for possível: experimento, mini-lab, checklist aplicado, prompt de investigação, exercício de código, diagrama, leitura de código, configuração local ou comparação crítica. Se uma estação for puramente conceitual, a entrega prática pode ser uma pergunta de modelagem ou exercício de explicação.
 
-**Regra de ouro:** se ultrapassar 10, sugira sub-trilhas. Não infle.
+### Fase 4 — Validação Atômica de Recursos (O Coração da Skill)
 
-**Estrutura narrativa:**
-- Estação 1: o problema / motivação
-- Intermediárias: desenvolvimento progressivo
-- Penúltima: quando NÃO usar / limitações
-- Última: síntese / como tudo se encaixa
+Esta é a etapa mais crítica. Para que a trilha seja incrivelmente útil, precisamos ter certeza de que o que recomendamos é excelente. 
 
-### Fase 4 — Validação Atômica de Recursos (CORE DA SKILL)
+Para cada tópico a ser aprofundado (slot de nervo):
+1. **Busque o conteúdo:** Use ferramentas de fetch para ler a URL do artigo/paper ou obter a transcrição de um vídeo.
+2. **Avalie o conteúdo:** Ele cobre especificamente o subtópico da estação? A profundidade está adequada para o nível da trilha? É atual (especialmente em tecnologia)? 
+3. **Avalie a autoridade do autor (para blogs, X, Reddit e comunidade):** Quando o recurso for um blog post, thread/post do X, Reddit, HN ou GitHub, confirme quem fala, qual contexto sustenta a afirmação e se há evidência técnica. Se não for possível validar autoridade, evidência ou consenso mínimo, descarte ou registre apenas como "sinal fraco" fora dos nervos principais.
+4. Se a resposta for "sim" para todos, o recurso é aprovado.
+5. **Extraia a prova:** Separe 1 ou 2 frases do próprio conteúdo que evidenciam a relevância dele para o subtópico. Isso será exibido na trilha para dar contexto ao usuário.
+6. **Classifique a modalidade:** leitura, vídeo, áudio, tutorial/lab, comunidade recente ou livro.
+7. Seja resiliente. Tente validar vários materiais até ter boas opções por estação.
 
-> Esta é a parte mais importante. Cada recurso é uma transação ACID: ou passa por todas as etapas e commita, ou aborta e tenta outro candidato.
+**Gates de qualidade e variedade:**
 
-Para CADA slot de nervo necessário (típico: 8-15 nervos por trilha):
+- Cada estação deve ter no mínimo 2 nervos validados. Prefira 3-4 quando houver bons materiais.
+- Evite repetir sempre o mesmo tipo de recurso. Uma estação ideal combina: 1 leitura forte, 1 vídeo ou áudio e 1 recurso prático ou de comunidade.
+- A trilha completa deve conter, quando o tema permitir: pelo menos 4 vídeos, 2 podcasts/áudios, 3 tutoriais/labs, 3 sinais recentes de comunidade, 2 livros opcionais e leitura profunda suficiente para fundamentar a espinha.
+- Não finalize uma trilha média/longa com apenas dois links ou apenas documentação. Isso é insuficiente para aprendizado real.
+- Se uma modalidade não existir, estiver atrás de paywall, não tiver transcrição ou não puder ser validada, declare a lacuna na auditoria e compense com outra modalidade validada.
+- Para fontes recentes, registre a data do post/artigo/discussão. Para X/Reddit, trate como termômetro de prática e debate, não como autoridade isolada.
 
-#### Passo 4.1 — Fetch obrigatório
+**Dica para uso de Sub-agentes:**
+Se o seu ambiente suportar agentes paralelos (como Claude Code usando a tool de Task), você pode gerar sub-agentes para lerem e avaliarem os recursos paralelamente, o que acelera bastante o processo. Peça a eles para retornarem o veredicto (aprovado/reprovado) e o trecho de evidência (excerpt).
 
-Use `web_fetch` na URL do candidato. Confirme que retornou 200 e tem conteúdo substantivo.
+### Fase 5 — Escolha do Formato de Saída
 
-#### Passo 4.2 — Extração de material substantivo
+Com a espinha montada e os nervos validados, **apresente ao usuário as opções de formato de saída** e peça que ele escolha:
 
-Por tipo de recurso:
+**Opção A — Markdown (`.md`)**
+- Arquivo leve, portátil, editável em qualquer editor.
+- Template: `assets/trail_template.md`
 
-**🎥 Vídeo (YouTube principalmente):**
-- Obter transcript. Caminhos, em ordem de preferência:
-  1. API/biblioteca de transcript do YouTube (`youtube-transcript-api`)
-  2. `yt-dlp --write-auto-subs --skip-download` para baixar legendas
-  3. Whisper local/API se as duas opções acima falharem
-- Se nenhuma funcionar: validar via descrição completa do vídeo + 10 top comentários + cross-check com outras menções do vídeo na web.
-- Se mesmo assim não conseguir validar conteúdo: **REPROVA** e busca outro.
+**Opção B — HTML Interativo Completo (`TEMPLATE.html`)**
+- Sidebar com navegação, dark mode automático + botão manual, Alpine.js + Tailwind via CDN.
+- Ideal para desktop, visual rico com navegaçao entre estações.
 
-**📚 Paper acadêmico:**
-- Fetch do PDF (preferencial) ou HTML.
-- Leitura obrigatória: abstract + introduction + conclusion.
-- Idealmente: methodology summary se relevante.
+**Opção C — HTML Minimalista para Leitura (`TEMPLATE_MINIMAL.html`)**
+- Design limpo, tipografia serifada para leitura focada, dark mode automático.
+- Ideal para impressão ou leitura prolongada.
 
-**🛠 Tutorial/blog:**
-- Fetch da página inteira.
-- Se < 3000 palavras: leia tudo.
-- Se ≥ 3000 palavras: leia introdução + heading principais + conclusão + uma seção do meio.
+**Opção D — HTML Linha do Tempo (`TEMPLATE_TIMELINE.html`)**
+- Visual em timeline vertical, cards de nervos em grid, dark mode automático.
+- Ideal para progressão visual do aprendizado.
 
-**📖 Livro:**
-- Não é possível ler o livro inteiro. Validação por proxy:
-  - Table of Contents (página oficial da editora ou Amazon "Look Inside")
-  - 3 reviews qualificadas (Goodreads, Amazon, blogs técnicos)
-  - Capítulo de amostra se disponível
-  - Index/sumário verificando cobertura do subtópico
+**Opção E — HTML Feed Mobile-First (`TEMPLATE_FEED.html`)**
+- Estilo feed de rede social, navegação inferior, otimizado para celular.
+- Ideal para consumo em dispositivos móveis.
 
-#### Passo 4.3 — Validação contra 3 critérios objetivos
+**IMPORTANTE:** Apresente todas as 5 opções com uma breve descrição de cada (como acima) e aguarde a escolha.
 
-Após extrair o material, responda explicitamente:
+### Fase 6 — Geração do Arquivo
 
-1. **Cobertura:** o recurso cobre o subtópico ESPECÍFICO da estação para a qual seria nervo? (não basta "fala do tema geral")
-2. **Profundidade:** o nível do recurso (intro/intermediário/avançado) bate com o `level` da trilha e da estação?
-3. **Atualidade:** para tópicos voláteis (cloud, AI, ferramentas modernas), o recurso é recente o bastante (≤ 3 anos para AI/ML, ≤ 5 anos para cloud nativo, sem limite para fundamentos atemporais)?
-
-Se as 3 respostas forem **sim**, recurso APROVADO. Senão, REPROVADO.
-
-#### Passo 4.4 — Sinais positivos (boost, não filtro)
+Com o formato escolhido pelo usuário:
 
-Após aprovação, use estes sinais para priorizar entre recursos aprovados equivalentes:
-- Canal/autor com histórico técnico forte (3Blue1Brown, Karpathy, Fowler, Kleppmann, ByteByteGo, etc.)
-- Venue acadêmico reconhecido (NeurIPS, ICML, USENIX, SIGCOMM, etc.)
-- Editora técnica (O'Reilly, Manning, Addison-Wesley, MIT Press, etc.)
-- Docs oficiais do projeto (sempre boost máximo)
+- Se **Markdown**: gere `./trilhas/{slug}.md` usando `assets/trail_template.md` como referência estrutural.
+- Se **HTML**: preencha o template escolhido (`TEMPLATE.html`, `TEMPLATE_MINIMAL.html`, `TEMPLATE_TIMELINE.html` ou `TEMPLATE_FEED.html`) com todo o conteúdo da trilha (estações, entregas práticas, nervos multimodais, checks, boss final, recursos adicionais, livros, auditoria e lacunas) e salve em `./trilhas/{slug}.html`.
 
-Esses sinais NÃO bloqueiam recursos sem eles — apenas desempatam.
+Certifique-se de substituir **todos** os placeholders `{...}` do template pelos valores reais da trilha. Inclua um resumo do mix multimodal: quantos vídeos, áudios/podcasts, tutoriais/labs, leituras profundas, livros e fontes recentes foram aprovados.
 
-#### Passo 4.5 — Persistência e desistência
+### Fase 7 — Fechamento
 
-- Por slot, tente até **10 candidatos** antes de desistir.
-- Meta: 3 aprovados por tipo de recurso (3 vídeos, 3 papers, 3 tutoriais, 3 livros).
-- Se chegou em 10 sem 3 aprovados: pare e documente honestamente no arquivo final:
-  > *Validamos N recursos deste tipo após inspecionar 10 candidatos. Recomendação: forneça fontes manualmente na próxima execução para enriquecer este slot.*
+Avise ao usuário que a trilha foi gerada e forneça estatísticas curtas: número de estações, nervos validados, vídeos, podcasts/áudios, tutoriais/labs, leituras profundas, fontes recentes, livros, estimativa de leitura/assistir/ouvir/praticar e o formato escolhido.
+Pergunte se ele deseja gerar em outro formato também, ou se está satisfeito.
+Deixe o usuário guiar os próximos passos, sugerindo se ele gostaria de conversar mais, criar um projeto prático para fixar ou avançar para um próximo tema, mas não imponha as etapas automaticamente.
 
-#### Passo 4.6 — Commit transacional
+## Pontos Importantes para a Interação
 
-Quando aprovado, registre no objeto do recurso:
-- URL
-- Título
-- Autor/Canal/Editora
-- Trecho-chave validado (1-2 frases extraídas do material que provam a cobertura)
-- Critério de aprovação (qual subtópico da estação ele aprofunda)
-- Timestamp da validação
-
-### Fase 5 — Distribuição dos nervos por estação
-
-Com a pool de recursos aprovados, distribua como nervos contextuais por estação. Regras:
-
-- 1 a 3 nervos por estação.
-- Cada nervo aprofunda um ponto **específico** da estação (não o tema geral).
-- Diversidade de mídia por estação quando possível.
-- Recursos aprovados que não viraram nervo → bloco "Recursos adicionais" no final.
-
-### Fase 6 — Geração do arquivo
-
-Salve em `./trilhas/{slug}.md`. Slug: kebab-case ASCII. Use o template da próxima seção.
-
-### Fase 7 — Conversa pós-geração
-
-> "Trilha gerada em `./trilhas/{slug}.md`. São {N} estações, {M} nervos validados, ~{X} min de leitura. Quando você terminar e responder mentalmente as 5 perguntas finais, me avise. Aí eu te ofereço: (a) gerar um plano de projeto prático sobre o que você aprendeu, ou (b) executar a skill novamente para o próximo tópico."
-
-**Nunca gere projeto prático automaticamente. Nunca avance para o próximo tópico sem confirmação.**
-
----
-
-## 🤖 Padrão de sub-agente (opcional, mas recomendado)
-
-Para harnesses que suportam sub-agents (Claude Code com Task tool, LangGraph, OpenAgents, etc.), paralelize a Fase 4:
-
-```
-for each candidate in candidates:
-    spawn_subagent({
-      task: f"""
-        Read URL: {candidate.url}
-        Goal: validate if this resource teaches "{station.subtopic}" at "{level}".
-        Steps:
-          1. Fetch full content (or transcript if YouTube)
-          2. Extract material per type rules in learning-trail SKILL
-          3. Answer: covers subtopic? appropriate depth? recent enough?
-          4. If approved: extract 1-2 sentence validated excerpt
-          5. Return: {approved: bool, excerpt: str, reason: str}
-      """,
-      tools: [web_fetch, web_search, youtube_transcript]
-    })
-```
-
-**Vantagens:**
-- Paraleliza validação (10 candidatos validados em ~tempo de 1)
-- Isola contexto (transcripts e PDFs não inflam o agente principal)
-- Cada sub-agent é descartável após retornar veredicto
-
-Se o harness NÃO suporta sub-agents, execute sequencialmente — funciona, só é mais lento.
-
----
-
-## Template do arquivo gerado
-
-````markdown
----
-id: {slug}
-topic: {Título exatamente como o usuário pediu}
-language: {pt-BR | en | es | ...}
-level: {beginner | intermediate | advanced}
-stations_count: {N}
-nerves_validated: {M}
-estimated_reading_minutes: {soma das estações}
-estimated_full_minutes: {leitura + tempo de todos os nervos}
-tags: [{tag1}, {tag2}]
-prerequisites: [{id-anterior-1}, {id-anterior-2}]
-next_steps: [{id-proximo-1}, {id-proximo-2}, {id-proximo-3}]
-created_at: {YYYY-MM-DD}
-sources_validated_at: {YYYY-MM-DD}
-generated_by: learning-trail-skill@v3.0
----
-
-# {Título}
-
-## 🎯 O que você vai conseguir fazer ao final
-
-{3-5 linhas. Habilidades concretas que o aluno terá ao chegar no fim da trilha.}
-
-## 🧱 Pré-requisitos
-
-{Se vazio: "Nenhum — trilha de entrada".}
-
-- [[{id-anterior}]] — {1 linha de por que importa}
-
-## 🗺 Mapa da Trilha
-
-| # | Estação | Tempo leitura | Nervos |
-|---|---------|---------------|--------|
-| 1 | {Título estação 1} | ~{X} min | {n} |
-| 2 | {Título estação 2} | ~{X} min | {n} |
-| ... | ... | ... | ... |
-| N | {Título estação N} | ~{X} min | {n} |
-
-**Boss final:** 5 perguntas socráticas de validação.
-
-**Tempo total estimado:** ~{X} min lendo + ~{Y} h se seguir todos os nervos.
-
-**Recursos validados:** {M} nervos passaram por inspeção atômica de conteúdo.
-
-## 📖 Se você quiser ir longe (livros opcionais)
-
-> Livros não são pré-requisito para concluir a trilha. São investimentos para quem se apaixonar pelo tema. Validados via Table of Contents + reviews qualificadas.
-
-### {Título}
-- **Autor(es):** {nomes}
-- **Editora:** {nome}
-- **Foco:** {introdutório | referência | avançado}
-- **Por que ler:** {1-2 linhas baseadas na ToC validada}
-- 🔍 **Validado:** {trecho-chave da ToC ou review que prova relevância}
-
-{Repetir para os 3 livros.}
-
----
-
-## 🎯 Estação 1 de {N}: {Título narrativo}
-
-> ⏱ ~{X} min leitura • 🔌 {Y} nervo(s) validado(s)
-
-{Parágrafo narrativo de 3-6 linhas. Conecta com estação anterior (se houver). Termina com tensão.}
-
-**🔌 Nervos:**
-
-- 🎥 [{Título}]({url}) — *{Canal}, {duração}*
-  - **quando seguir:** {1 frase contextual}
-  - 🔍 **validado:** {trecho extraído do transcript/conteúdo que prova cobertura específica do subtópico — ex: "transcript confirma cobertura de Q/K/V e multi-head attention nos minutos 7-14"}
-
-- 📚 [{Título}]({url}) — *{Autores}, {ano}, {venue}*
-  - **quando seguir:** {1 frase}
-  - 🔍 **validado:** {trecho do abstract ou conclusão que prova relevância}
-
-**🧭 Check de avanço:**
-> Antes de seguir: {pergunta socrática binária}. Se não, releia ou veja o nervo {X}.
-
-[Estação 2 →](#-estação-2-de-n-título)
-
----
-
-{... estações intermediárias seguem o mesmo padrão ...}
-
----
-
-## 🎯 Estação {N} de {N}: Síntese — como tudo se encaixa
-
-> ⏱ ~{X} min leitura
-
-{Recapitula a jornada, conecta os pontos. Prepara o boss final.}
-
-[← Estação {N-1}](#)
-
----
-
-## 🏁 Boss Final: 5 perguntas socráticas
-
-> Sem gabarito. Responda mentalmente ou por escrito.
-
-1. **Conceitual:** {pergunta sobre fundamentos}
-2. **Conceitual:** {pergunta sobre diferenciação}
-3. **Aplicada:** {cenário X — como usaria Y?}
-4. **Aplicada:** {descreva sistema real onde isso resolveria um problema}
-5. **Crítica:** {quando isso é escolha errada? Que sinais indicariam outra abordagem?}
-
----
-
-## ➡️ Próximos passos sugeridos
-
-- [[{id-proximo-1}]] — {1 linha do porquê}
-- [[{id-proximo-2}]] — {1 linha do porquê}
-- [[{id-proximo-3}]] — {1 linha do porquê}
-
-## 📦 Recursos adicionais (validados, sem virar nervo)
-
-- 🎥 [{Título}]({url}) — 🔍 validado: {trecho curto}
-- 📚 [{Título}]({url}) — 🔍 validado: {trecho curto}
-- 🛠 [{Título}]({url}) — 🔍 validado: {trecho curto}
-
-## 📌 Fontes adicionais informadas pelo usuário
-
-{Se houver. Senão, omita.}
-
-## 🔍 Auditoria da validação
-
-- Candidatos inspecionados: {número total que passaram pela Fase 4}
-- Aprovados: {número que viraram nervos ou recursos adicionais}
-- Reprovados: {número que falharam em cobertura/profundidade/atualidade}
-- Lacunas declaradas: {liste se algum slot não atingiu meta de 3 aprovados}
-
----
-
-*Gerado por `learning-trail` skill v3.0 em {timestamp}. Cada recurso passou por inspeção atômica de conteúdo (trust by inspection). Links validados na data acima — re-execute a skill se trilha tiver > 6 meses.*
-````
-
----
-
-## Heurísticas pedagógicas
-
-### Como escrever o parágrafo narrativo de uma estação
-
-1. **Conecte com a anterior:** "Até aqui você viu X. Agora..."
-2. **Um conceito por estação.** Se aparecer mais de um, quebre.
-3. **Termine com tensão.** Última frase cria a pergunta que a próxima estação ou o nervo responde.
-4. **Evite definições enciclopédicas.** "X é Y" é fraco. "X resolve o problema de Y porque..." é forte.
-
-### Como escolher os nervos
-
-1. **Contexto explícito sempre** — "quando seguir: [motivo]".
-2. **Granularidade compatível.** Vídeo de 30 min ≠ nervo de uma estação. Vai pra "Recursos adicionais".
-3. **Diversidade de mídia** quando possível.
-4. **Trecho validado obrigatório.** Sem prova de leitura/transcrição, não vira nervo.
-
-### Como escrever o check de avanço
-
-- Binário (sim/não).
-- Com fallback explícito.
-- Pergunta de produção: "Você consegue **explicar** X" > "Você lembra de X".
-
-### Como escrever as 5 perguntas do boss final
-
-- 2 conceituais + 2 aplicadas + 1 crítica.
-- Devem exigir integração de múltiplas estações.
-- **Sem gabarito. Nunca.**
-
----
-
-## Anti-padrões (NÃO FAÇA)
-
-- ❌ Recomendar recurso sem ter lido o conteúdo real.
-- ❌ Confiar em título + snippet de busca como prova de relevância.
-- ❌ Filtrar candidatos por whitelist antes da validação.
-- ❌ Preencher slot com recurso reprovado por falta de opções (declare lacuna).
-- ❌ Escrever "explicação inteira" do tópico sem buscar nada.
-- ❌ Criar estação enciclopédica longa (> 10 min de leitura).
-- ❌ Listar nervo sem o campo "validado:".
-- ❌ Inflar para 12+ estações em vez de sugerir sub-trilhas.
-- ❌ Dar gabarito de check ou pergunta final.
-- ❌ Gerar projeto prático ou pular para próximo tópico sem o usuário pedir.
-- ❌ Misturar idiomas na estrutura.
-- ❌ Inventar URLs, autores, papers ou trechos. Em dúvida → omita.
-
----
-
-## Exemplo de invocação correta
-
-**Usuário:** "quero entender Service Mesh"
-
-**Agente (em ordem):**
-1. Detecta idioma: `pt-BR`.
-2. Pergunta: "Automático ou customizado?" → "auto". "Fontes próprias?" → "não".
-3. **Fase 2:** busca AMPLA — 12 vídeos candidatos, 8 papers, 14 tutoriais, 9 livros.
-4. **Fase 3:** desenha espinha (7 estações).
-5. **Fase 4:** valida cada candidato individualmente.
-   - Vídeo "Service Mesh in 100 Seconds" (Fireship) → transcript baixado → cobre só visão geral → APROVADO para Estação 1 mas não E3.
-   - Vídeo "Istio Architecture Deep Dive" (canal pequeno) → transcript baixado → cobre detalhadamente data/control plane → APROVADO para Estação 4 (não tem o "boost" do canal famoso, mas conteúdo passa).
-   - Paper "The Service Mesh: What Every Software Engineer Should Know" → abstract+conclusão lidos → APROVADO para Estação 7.
-   - Tutorial "Istio em 30 min" (blog desconhecido) → conteúdo lido → desatualizado (Istio 1.6, atual é 1.20) → REPROVADO. Busca substituto.
-   - ... até completar 3 aprovados por tipo.
-6. **Fase 5:** distribui nervos contextualmente por estação.
-7. **Fase 6:** gera `./trilhas/service-mesh.md` com cada nervo carregando seu trecho validado.
-8. **Fase 7:** "Trilha pronta. Projeto prático ou próximo tópico?"
+- Procure não gerar conceitos inteiros "de cabeça"; busque validação, para garantir que as informações são frescas e exatas.
+- Se o usuário não gostar de alguma seção, adapte-a iterativamente.
+- Faça o processo ser transparente: mostre brevemente ao usuário quando você estiver descartando um link por ele ser inadequado, pois isso demonstra o valor da curadoria que você está fazendo.

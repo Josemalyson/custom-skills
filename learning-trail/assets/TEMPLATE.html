@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html
+  lang="{idioma}"
+  class="scroll-smooth"
+  x-data="{
+    dark: window.matchMedia('(prefers-color-scheme: dark)').matches,
+    mobileNav: false,
+    toggleDark() {
+      this.dark = !this.dark;
+      document.documentElement.classList.toggle('dark', this.dark);
+      document.documentElement.style.colorScheme = this.dark ? 'dark' : 'light';
+    }
+  }"
+  x-init="
+    document.documentElement.classList.toggle('dark', dark);
+    document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+  "
+>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
+  <title>Learning Trail — {Título}</title>
+  <link rel="preconnect" href="https://cdn.tailwindcss.com">
+  <link rel="preconnect" href="https://unpkg.com">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: { DEFAULT: '#6366f1', hover: '#4f46e5' },
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    /* Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
+    }
+
+    /* Sidebar active link */
+    .nav-link[aria-current="true"] {
+      background-color: rgb(238 242 255);
+      color: #4f46e5;
+      border-color: #c7d2fe;
+    }
+    .dark .nav-link[aria-current="true"] {
+      background-color: rgb(30 27 75 / 0.5);
+      color: #a5b4fc;
+      border-color: #3730a3;
+    }
+
+    /* Overscroll containment */
+    .overscroll-y-contain { overscroll-behavior-y: contain; }
+
+    /* Focus skip link */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 1rem;
+      z-index: 100;
+      padding: 0.5rem 1rem;
+      background: #6366f1;
+      color: white;
+      border-radius: 0 0 0.5rem 0.5rem;
+      font-weight: 600;
+      transition: top 0.2s;
+    }
+    .skip-link:focus { top: 0; }
+  </style>
+</head>
+<body
+  class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans antialiased"
+  style="color-scheme: light;"
+  :style="dark ? 'color-scheme: dark' : 'color-scheme: light'"
+>
+
+  <!-- Skip to main content -->
+  <a href="#main-content" class="skip-link focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+    Ir para o conteúdo principal
+  </a>
+
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- ============================================================
+         SIDEBAR — Mapa da Trilha
+    ============================================================ -->
+    <aside
+      id="sidebar"
+      class="hidden md:flex flex-col w-72 shrink-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 overflow-y-auto custom-scrollbar z-10 overscroll-y-contain"
+      aria-label="Mapa da trilha"
+    >
+      <div class="p-5 flex flex-col h-full">
+
+        <!-- Logo / Título -->
+        <div class="flex items-center gap-3 mb-8 min-w-0">
+          <div class="flex items-center justify-center w-9 h-9 rounded-xl bg-indigo-600 shrink-0 shadow-sm">
+            <i class="ph-fill ph-compass text-white text-lg" aria-hidden="true"></i>
+          </div>
+          <div class="min-w-0">
+            <h1 class="text-sm font-bold truncate text-slate-900 dark:text-slate-100"><span translate="no">{Título}</span></h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-widest">Learning Trail</p>
+          </div>
+        </div>
+
+        <!-- Badges de meta -->
+        <div class="flex flex-wrap gap-1.5 mb-6">
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold">
+            <i class="ph ph-graduation-cap text-xs" aria-hidden="true"></i> {level}
+          </span>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-xs font-semibold">
+            <i class="ph ph-map-pin text-xs" aria-hidden="true"></i> {N} estações
+          </span>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">
+            <i class="ph ph-check-circle text-xs" aria-hidden="true"></i> {M} validados
+          </span>
+        </div>
+
+        <!-- Nav de estações -->
+        <nav aria-label="Estações da trilha">
+          <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 px-1">Estações</p>
+          <ul class="space-y-0.5" role="list">
+
+            <!-- Repita para cada estação -->
+            <li>
+              <a
+                href="#estacao-1"
+                class="nav-link flex items-start gap-3 p-2.5 rounded-lg border border-transparent text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900"
+                style="touch-action: manipulation"
+              >
+                <span class="flex items-center justify-center w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold shrink-0 mt-0.5">1</span>
+                <span class="min-w-0">
+                  <span class="block text-sm font-medium leading-snug">{Título estação 1}</span>
+                  <span class="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                    <i class="ph ph-clock" aria-hidden="true"></i>
+                    <span>~{X}&nbsp;min</span>
+                  </span>
+                </span>
+              </a>
+            </li>
+            <!-- Fim estação -->
+
+            <!-- Boss Final -->
+            <li class="pt-3 mt-2 border-t border-slate-100 dark:border-slate-800">
+              <a
+                href="#boss-final"
+                class="nav-link flex items-center gap-3 p-2.5 rounded-lg border border-transparent text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
+                style="touch-action: manipulation"
+              >
+                <i class="ph-fill ph-sword text-lg shrink-0" aria-hidden="true"></i>
+                <span class="text-sm font-bold">Boss Final</span>
+              </a>
+            </li>
+
+          </ul>
+        </nav>
+
+        <!-- Rodapé da sidebar -->
+        <div class="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
+          <p class="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+            <i class="ph ph-shield-check text-emerald-500" aria-hidden="true"></i>
+              <span translate="no">Trust&nbsp;by&nbsp;Inspection</span>
+          </p>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- ============================================================
+         MAIN
+    ============================================================ -->
+    <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
+
+      <!-- Header fixo -->
+      <header class="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+        <div class="flex items-center justify-between px-4 h-14 gap-3">
+
+          <!-- Mobile: título truncado -->
+          <div class="flex md:hidden items-center gap-2 min-w-0">
+            <i class="ph-fill ph-compass text-indigo-600 dark:text-indigo-400 text-xl shrink-0" aria-hidden="true"></i>
+            <span class="text-sm font-bold truncate" translate="no">{Título}</span>
+          </div>
+
+          <!-- Desktop: breadcrumb silencioso -->
+          <p class="hidden md:block text-sm text-slate-500 dark:text-slate-400">
+            <span translate="no">Learning Trail</span>
+          </p>
+
+          <!-- Controles -->
+          <div class="flex items-center gap-2 ml-auto">
+            <!-- Dark mode -->
+            <button
+              @click="toggleDark()"
+              :aria-pressed="dark"
+              aria-label="Alternar modo escuro"
+              class="p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+              style="touch-action: manipulation"
+            >
+              <i class="ph text-lg" :class="dark ? 'ph-sun' : 'ph-moon'" aria-hidden="true"></i>
+            </button>
+          </div>
+
+        </div>
+      </header>
+
+      <!-- Conteúdo rolável -->
+      <main id="main-content" class="flex-1 overflow-y-auto custom-scrollbar">
+        <div class="max-w-2xl mx-auto px-5 py-10 md:py-16">
+
+          <!-- ── HERO ──────────────────────────────────────────── -->
+          <header class="mb-14">
+            <div class="flex flex-wrap gap-2 mb-5" role="list" aria-label="Metadados da trilha">
+              <span role="listitem" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold border border-slate-200 dark:border-slate-700">
+                Nível:&nbsp;{level}
+              </span>
+              <span role="listitem" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold border border-slate-200 dark:border-slate-700">
+                {N}&nbsp;Estações
+              </span>
+              <span role="listitem" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-xs font-semibold border border-indigo-200 dark:border-indigo-900">
+                <i class="ph ph-check" aria-hidden="true"></i> {M}&nbsp;Nervos Validados
+              </span>
+            </div>
+
+            <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-5 text-pretty">
+              {Título}
+            </h2>
+
+            <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+              <h3 class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 flex items-center gap-1.5">
+                <i class="ph ph-target" aria-hidden="true"></i> Objetivo
+              </h3>
+              <p class="text-slate-700 dark:text-slate-300 leading-relaxed text-pretty">
+                {O que você vai conseguir fazer ao final — 3 a 5 linhas de habilidades concretas}
+              </p>
+            </div>
+          </header>
+
+          <hr class="border-slate-200 dark:border-slate-800 mb-14" aria-hidden="true">
+
+          <!-- ── ESTAÇÕES ───────────────────────────────────────
+               Repita este bloco <section> para cada estação
+          ──────────────────────────────────────────────────── -->
+          <section id="estacao-1" class="mb-16 scroll-mt-20" aria-labelledby="estacao-1-titulo">
+
+            <!-- Cabeçalho da estação -->
+            <div class="flex items-center gap-3 mb-5">
+              <span
+                class="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white font-bold text-sm shrink-0 shadow"
+                aria-hidden="true"
+              >1</span>
+              <h2 id="estacao-1-titulo" class="text-xl font-bold text-pretty">
+                {Título narrativo}
+              </h2>
+            </div>
+
+            <!-- Metadados inline -->
+            <p class="text-xs text-slate-400 dark:text-slate-500 mb-5 flex items-center gap-3 font-medium">
+              <span class="flex items-center gap-1">
+                <i class="ph ph-clock" aria-hidden="true"></i> ~{X}&nbsp;min leitura
+              </span>
+              <span class="flex items-center gap-1">
+                <i class="ph ph-plug" aria-hidden="true"></i> {Y}&nbsp;nervo(s)
+              </span>
+            </p>
+
+            <!-- Narrativa -->
+            <div class="text-slate-700 dark:text-slate-300 leading-relaxed mb-8 space-y-3 text-[1.0625rem]">
+              <p>{Parágrafo narrativo de 3–6 linhas. Conecta com a estação anterior e termina com tensão.}</p>
+            </div>
+
+            <!-- Nervos (recursos validados) -->
+            <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 overflow-hidden mb-6">
+              <div class="flex items-center gap-2 px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                <i class="ph ph-plug text-indigo-500 dark:text-indigo-400" aria-hidden="true"></i>
+                <h3 class="text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-300">
+                  Nervos Validados
+                </h3>
+              </div>
+
+              <ul class="divide-y divide-slate-200 dark:divide-slate-800" role="list">
+
+                <!-- Repita para cada nervo -->
+                <li class="p-4">
+                  <div class="flex items-start gap-3">
+                    <!-- Ícone de tipo: ph-video / ph-headphones / ph-book / ph-article / ph-wrench / ph-chats -->
+                    <div
+                      class="flex items-center justify-center w-9 h-9 rounded-lg bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5"
+                      aria-hidden="true"
+                    >
+                      <i class="ph-fill ph-video text-lg"></i>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <a
+                        href="{url}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-sm font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-150 inline-flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 rounded"
+                        style="touch-action: manipulation"
+                      >
+                        <span class="truncate" translate="no">{Título do Recurso}</span>
+                        <i class="ph ph-arrow-up-right text-xs shrink-0 opacity-50" aria-hidden="true"></i>
+                      </a>
+                      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        {Canal/Autor} &middot; {Duração/Tipo}
+                      </p>
+                      <div class="mt-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-3 space-y-2">
+                        <p class="text-xs text-slate-700 dark:text-slate-300">
+                          <strong>Quando seguir:</strong> {contexto}
+                        </p>
+                        <p class="text-xs italic text-slate-500 dark:text-slate-400 border-l-2 border-indigo-300 dark:border-indigo-700 pl-2">
+                          <strong class="not-italic text-emerald-600 dark:text-emerald-400">
+                            <i class="ph ph-check-circle" aria-hidden="true"></i> Validado:
+                          </strong>
+                          &ldquo;{trecho}&rdquo;
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <!-- Fim nervo -->
+
+              </ul>
+            </div>
+
+            <!-- Check de avanço -->
+            <div
+              class="rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/30 p-4"
+              role="note"
+              aria-label="Check de avanço"
+            >
+              <p class="text-xs font-bold uppercase tracking-widest text-amber-700 dark:text-amber-500 mb-1.5 flex items-center gap-1.5">
+                <i class="ph ph-compass-rose" aria-hidden="true"></i> Check de avanço
+              </p>
+              <p class="text-sm font-medium text-amber-900 dark:text-amber-200 text-pretty">
+                {Pergunta socrática binária}. Se não, reveja os nervos acima.
+              </p>
+            </div>
+
+          </section>
+          <!-- ── FIM ESTAÇÃO ─────────────────────────────────── -->
+
+          <hr class="border-slate-200 dark:border-slate-800 mb-16" aria-hidden="true">
+
+          <!-- ── BOSS FINAL ─────────────────────────────────── -->
+          <section id="boss-final" class="mb-16 scroll-mt-20" aria-labelledby="boss-titulo">
+            <div class="rounded-2xl bg-slate-900 dark:bg-slate-950 border border-slate-800 p-8 md:p-10 relative overflow-hidden">
+
+              <!-- Decoração de fundo -->
+              <div class="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+                <div class="absolute -top-16 -right-16 w-56 h-56 bg-indigo-600 rounded-full opacity-10 blur-3xl"></div>
+                <div class="absolute -bottom-16 -left-16 w-56 h-56 bg-violet-600 rounded-full opacity-10 blur-3xl"></div>
+              </div>
+
+              <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-5">
+                  <div class="flex items-center justify-center w-11 h-11 rounded-xl bg-white/10 border border-white/20">
+                    <i class="ph-fill ph-sword text-2xl text-amber-400" aria-hidden="true"></i>
+                  </div>
+                  <h2 id="boss-titulo" class="text-2xl font-extrabold text-white text-pretty">
+                    Boss Final
+                  </h2>
+                </div>
+
+                <p class="text-slate-400 mb-8 text-pretty">
+                  Sem gabarito. Responda mentalmente ou por escrito para provar retenção e síntese.
+                </p>
+
+                <ol class="space-y-4" aria-label="Perguntas socráticas">
+                  <!-- Repita para as 5 perguntas -->
+                  <li class="rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors duration-150 p-4">
+                    <span class="block text-indigo-300 text-xs font-bold uppercase tracking-widest mb-1.5">
+                      1. Conceitual
+                    </span>
+                    <p class="text-white font-medium text-pretty">{Pergunta}</p>
+                  </li>
+                  <!-- Fim pergunta -->
+                </ol>
+              </div>
+            </div>
+          </section>
+
+          <!-- ── RECURSOS ADICIONAIS MULTIMODAIS ───────────── -->
+          <section class="mb-16" aria-labelledby="recursos-adicionais-titulo">
+            <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+              <h3 id="recursos-adicionais-titulo" class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-1.5">
+                <i class="ph ph-package" aria-hidden="true"></i> Recursos Adicionais Multimodais
+              </h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">
+                Vídeos, podcasts, leituras, tutoriais, livros e sinais recentes validados que complementam a trilha.
+              </p>
+              <ul class="space-y-2" role="list">
+                <li class="text-sm text-slate-700 dark:text-slate-300 flex items-start gap-2">
+                  <i class="ph ph-video text-indigo-500 mt-0.5 shrink-0" aria-hidden="true"></i>
+                  <span><a href="{url}" target="_blank" rel="noopener noreferrer" class="font-medium hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" translate="no">{Título do vídeo}</a> — <span class="text-slate-500 dark:text-slate-400">🔍 validado: {trecho curto}</span></span>
+                </li>
+                <li class="text-sm text-slate-700 dark:text-slate-300 flex items-start gap-2">
+                  <i class="ph ph-headphones text-indigo-500 mt-0.5 shrink-0" aria-hidden="true"></i>
+                  <span><a href="{url}" target="_blank" rel="noopener noreferrer" class="font-medium hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" translate="no">{Título do podcast}</a> — <span class="text-slate-500 dark:text-slate-400">🔍 validado: {trecho curto/timestamp}</span></span>
+                </li>
+                <li class="text-sm text-slate-700 dark:text-slate-300 flex items-start gap-2">
+                  <i class="ph ph-wrench text-indigo-500 mt-0.5 shrink-0" aria-hidden="true"></i>
+                  <span><a href="{url}" target="_blank" rel="noopener noreferrer" class="font-medium hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" translate="no">{Título do tutorial/lab}</a> — <span class="text-slate-500 dark:text-slate-400">🔍 validado: {trecho curto}</span></span>
+                </li>
+                <li class="text-sm text-slate-700 dark:text-slate-300 flex items-start gap-2">
+                  <i class="ph ph-chats-circle text-indigo-500 mt-0.5 shrink-0" aria-hidden="true"></i>
+                  <span><a href="{url}" target="_blank" rel="noopener noreferrer" class="font-medium hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" translate="no">{Discussão recente}</a> — <span class="text-slate-500 dark:text-slate-400">🔍 validado: {trecho curto + data}</span></span>
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <!-- ── PRÓXIMOS PASSOS ──────────────────────────── -->
+          <section class="mb-16" aria-labelledby="proximos-passos-titulo">
+            <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+              <h3 id="proximos-passos-titulo" class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-1.5">
+                <i class="ph ph-arrow-fat-lines-right" aria-hidden="true"></i> Próximos Passos Sugeridos
+              </h3>
+              <ul class="space-y-2" role="list">
+                <li class="text-sm text-slate-700 dark:text-slate-300">
+                  <a href="#" class="font-medium text-indigo-600 dark:text-indigo-400 hover:underline" translate="no">{Próximo tópico}</a> — <span class="text-slate-500 dark:text-slate-400">{1 linha do porquê}</span>
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <!-- ── AUDITORIA ──────────────────────────────────── -->
+          <footer class="pt-8 border-t border-slate-200 dark:border-slate-800 text-sm" aria-label="Auditoria da trilha">
+            <p class="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5 mb-3">
+              <i class="ph ph-shield-check text-emerald-500" aria-hidden="true"></i>
+              Auditoria <span translate="no">Trust by Inspection</span>
+            </p>
+            <ul class="space-y-1 text-slate-500 dark:text-slate-400 list-disc list-inside">
+              <li>Candidatos inspecionados: {total_inspecionados}</li>
+              <li>Aprovados e validados: {M}&nbsp;nervos</li>
+              <li>Mix multimodal: {videos}&nbsp;vídeos, {audios}&nbsp;áudios/podcasts, {tutorials}&nbsp;tutoriais/labs, {recentes}&nbsp;fontes recentes, {books}&nbsp;livros</li>
+              <li>Lacunas declaradas: {lacunas}</li>
+              <li>Gerado por <code class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs" translate="no">learning-trail-skill</code></li>
+            </ul>
+          </footer>
+
+        </div>
+      </main>
+    </div>
+
+  </div>
+</body>
+</html>
