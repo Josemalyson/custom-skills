@@ -72,6 +72,23 @@ Direcione a busca exploratória para estes tipos de fonte. Não trate a lista co
 - 5-10 sinais recentes de comunidade, preferencialmente dos últimos 30-180 dias para tecnologia ativa.
 - 3-5 livros ou capítulos relevantes.
 
+#### Busca obrigatória por vídeos (não opcional)
+
+Vídeos são uma modalidade obrigatória, não opcional. Para cada estação planejada, execute buscas com termos explícitos de vídeo. Não basta buscar artigos e esperar encontrar vídeos por acaso.
+
+Queries obrigatórias a executar (adapte ao tema):
+- `site:youtube.com "{tema}" architecture` ou `site:youtube.com "{tema}" deep dive`
+- `"{tema}" conference talk 2025 2026`
+- `"{tema}" demo walkthrough tutorial`
+- `"{tema}" presentation slides`
+
+Meta mínima: **6 vídeos candidatos** antes da validação. Registre todos no array `resources[]` com `type: "video"` e status `rejected` se não passarem na validação.
+
+Se o tema realmente não tiver vídeos disponíveis (ex: RFC obscura, padrão muito novo), isso NÃO é justificativa para pular a busca. Faça a busca, encontre 0 resultados, e registre em `audit.declared_gaps`:
+```json
+"declared_gaps": ["Nenhum vídeo encontrado para este tema após busca com site:youtube.com"]
+```
+
 ### Fase 3 — Desenho da Espinha (Estações)
 
 Determine a sequência lógica do aprendizado.
@@ -103,7 +120,12 @@ Para cada tópico a ser aprofundado (slot de nervo):
 - Evite repetir sempre o mesmo tipo de recurso. Uma estação ideal combina: 1 leitura forte, 1 vídeo ou áudio, 1 recurso prático e 1 de comunidade ou livro.
 - A trilha completa deve conter, quando o tema permitir: pelo menos 4 vídeos, 2 podcasts/áudios, 3 tutoriais/labs, 3 sinais recentes de comunidade, 2 livros opcionais e leitura profunda suficiente para fundamentar a espinha.
 - Não finalize uma trilha média/longa com apenas dois links ou apenas documentação. Isso é insuficiente para aprendizado real.
-- Se uma modalidade não existir, estiver atrás de paywall, não tiver transcrição ou não puder ser validada, declare a lacuna na auditoria e compense com outra modalidade validada.
+- Se uma modalidade não existir, estiver atrás de paywall, não tiver transcrição ou não puder ser validada:
+  1. **Registre em `audit.declared_gaps`** com motivo explícito: `"Nenhum vídeo encontrado para este tema"` ou `"Vídeos encontrados mas sem transcript válida para validação"`
+  2. **NÃO preencha** `audit.resources_by_modality.{modalidade}` com número maior que 0
+  3. **NÃO preencha** `summary.modalities.{modalidade}` com número maior que 0
+  4. **NÃO preencha** `summary.estimated_minutes.watching` se não houver vídeos aprovados
+  5. **O campo `declared_gaps` é OBRIGATÓRIO** quando qualquer modalidade tem contagem zero — não o deixe como array vazio
 - Para fontes recentes, registre a data do post/artigo/discussão. Para X/Reddit, trate como termômetro de prática e debate, não como autoridade isolada.
 
 #### Validação obrigatória de vídeos e YouTube
@@ -131,6 +153,19 @@ Todo recurso pesquisado durante a Fase 2 e Fase 4 deve ser registrado, mesmo que
 **Dica para uso de Sub-agentes:**
 Se o seu ambiente suportar agentes paralelos (como Claude Code usando a tool de Task), você pode gerar sub-agentes para lerem e avaliarem os recursos paralelamente, o que acelera bastante o processo. Peça a eles para retornarem o veredicto (aprovado/reprovado) e o trecho de evidência (excerpt).
 
+#### Gate de Modalidades (obrigatório antes de avançar)
+
+**NÃO prossiga para Fase 5 sem completar este checklist.** Conte os recursos reais em `resources[]` e verifique:
+
+- [ ] Pelo menos **6 vídeos candidatos** foram buscados na Fase 2 (mesmo que todos sejam rejected)
+- [ ] Pelo menos **2 vídeos** estão com `status: "approved"` OU `audit.declared_gaps` documenta a ausência com motivo explícito
+- [ ] Pelo menos **1 podcast/áudio** foi buscado (se o tema permitir; se não, documente em `declared_gaps`)
+- [ ] Pelo menos **3 tutoriais/labs** estão no `resources[]` com `status: "approved"`
+- [ ] Pelo menos **3 sinais de comunidade** estão no `resources[]` com `status: "approved"`
+- [ ] Cada estação tem **≥4 nervos** OU `declared_gaps` na estação documenta a exceção
+
+Se **qualquer checkbox falhar**, volte à Fase 2 ou Fase 4 e complemente. A única exceção é quando a modalidade genuinamente não existe para o tema — nesse caso, o `declared_gaps` deve documentar explicitamente a tentativa de busca e o motivo da ausência.
+
 ### Fase 5 — Escolha do Formato de Saída
 
 Com a espinha montada e os nervos validados, **apresente ao usuário as opções de formato de saída** e peça que ele escolha:
@@ -155,6 +190,18 @@ Com a espinha montada e os nervos validados, **apresente ao usuário as opções
 
 Com o formato escolhido pelo usuário:
 
+#### Checklist Pré-Geração (executar ANTES de escrever qualquer arquivo)
+
+Execute este checklist programaticamente (não manualmente) — ele é o último gate antes de persistir dados:
+
+1. **Conte recursos por tipo** em `resources[]` e compare com `audit.resources_by_modality` — devem ser idênticos
+2. **Valide referências:** todo `resource_id` em `stations[].nerves[]` existe em `resources[]`
+3. **Valide status:** nenhum recurso `rejected` aparece como nervo de estação
+4. **Valide vídeos:** se `audit.resources_by_modality.videos > 0`, verifique que cada vídeo aprovado tem `validation.methods` contendo pelo menos 1 método de YouTube (`youtube_transcript`, `youtube_chapters`, `description`, `slides_repo`, `cross_check`, `show_notes`)
+5. **Valide declared_gaps:** se alguma modalidade tem contagem 0 em `audit.resources_by_modality`, verifique que `audit.declared_gaps` documenta o motivo
+6. **Valide coerência:** `summary.modalities` deve ser idêntico a `audit.resources_by_modality`
+7. **Se qualquer verificação falhar**, CORRIJA o JSON antes de prosseguir — não salve JSON inválido
+
 #### Diretório de saída
 
 Criar um diretório por assunto antes de escrever os arquivos:
@@ -176,8 +223,38 @@ Regras do contrato JSON:
 - Apenas recursos `approved` podem aparecer em `stations[].nerves[]`.
 - Recursos `backup` podem aparecer em `additional_resources[]`.
 - Todo recurso `video` aprovado de YouTube deve ter pelo menos um método de validação.
-- Contagens em `summary` e `audit` devem ser deriváveis de `stations[]` e `resources[]`.
 - `meta.id` é a chave estável do progresso. Alterar `meta.id` reseta o progresso do usuário.
+
+#### Regra obrigatória de derivação do audit (NÃO escreva manualmente)
+
+Os campos `audit` e `summary.modalities` **NÃO devem ser escritos à mão**. Compute-os programaticamente a partir dos dados reais em `resources[]` antes de salvar o JSON:
+
+```
+# Contagens por modalidade (apenas approved)
+audit.resources_by_modality.readings = count(resources, type=="reading" AND status=="approved")
+audit.resources_by_modality.videos = count(resources, type=="video" AND status=="approved")
+audit.resources_by_modality.audio_podcasts = count(resources, type=="audio" AND status=="approved")
+audit.resources_by_modality.tutorials_labs = count(resources, type=="tutorial_lab" AND status=="approved")
+audit.resources_by_modality.recent_community = count(resources, type=="recent_community" AND status=="approved")
+audit.resources_by_modality.books = count(resources, type=="book" AND status=="approved")
+
+# Contagens gerais (TODOS os candidatos, inclusive rejected)
+audit.inspected = count(resources)  # todos os status
+audit.approved = count(resources, status=="approved")
+audit.rejected = count(resources, status=="rejected")
+audit.backup = count(resources, status=="backup")
+audit.weak_signals = count(resources, status=="weak_signal")
+
+# Duração estimada (apenas aprovados)
+summary.estimated_minutes.watching = sum(resources, type=="video" AND status=="approved", duration_minutes)
+summary.estimated_minutes.reading = sum(resources, type=="reading" AND status=="approved", duration_minutes)
+summary.estimated_minutes.practice = sum(stations[].practice.estimated_minutes)
+
+# Modalidades do summary (espelho do audit)
+summary.modalities = audit.resources_by_modality
+```
+
+**Bloqueio de integridade:** Se `audit.resources_by_modality.videos > 0` mas `resources[]` não contém nenhum recurso com `type: "video"`, o JSON é **INVÁLIDO** — não salve. O mesmo vale para qualquer outra modalidade.
 
 Salvar como `./trilhas/{slug}/trail.json`.
 
