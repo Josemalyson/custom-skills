@@ -1,0 +1,130 @@
+{
+  "schema": "learning-trail/v1",
+  "schema_version": 1,
+  "meta": {
+    "id": "slug-YYYY-MM-DD",
+    "slug": "slug",
+    "title": "Titulo",
+    "language": "pt-BR",
+    "level": "beginner|intermediate|advanced",
+    "created_at": "YYYY-MM-DD",
+    "sources_validated_at": "YYYY-MM-DD",
+    "generated_by": "learning-trail-skill@v4.0",
+    "template_version": "1.0.0"
+  },
+  "summary": {
+    "objective": ["habilidade 1", "habilidade 2"],
+    "stations_count": 0,
+    "nerves_validated": 0,
+    "estimated_minutes": {
+      "reading": 0,
+      "watching": 0,
+      "listening": 0,
+      "practice": 0,
+      "total": 0
+    },
+    "modalities": {
+      "readings": 0,
+      "videos": 0,
+      "audio_podcasts": 0,
+      "tutorials_labs": 0,
+      "recent_community": 0,
+      "books": 0
+    }
+  },
+  "progress": {
+    "enabled": true,
+    "storage_key": "learning-trail:{meta.id}:progress:v1",
+    "version": 1,
+    "status_values": ["not_started", "in_progress", "completed"],
+    "defaults": {
+      "station_status": "not_started"
+    }
+  },
+  "prerequisites": [],
+  "stations": [
+    {
+      "id": "estacao-1",
+      "number": 1,
+      "title": "Titulo narrativo",
+      "narrative": ["paragrafo 1", "paragrafo 2"],
+      "reading_minutes": 8,
+      "practice": {
+        "title": "Entrega pratica",
+        "description": "Descricao",
+        "estimated_minutes": 30
+      },
+      "nerves": [
+        {
+          "resource_id": "resource-id",
+          "when_to_follow": "Quando usar este recurso",
+          "station_validation": {
+            "method": "youtube_transcript|youtube_chapters|description|content_fetch|toc|show_notes|slides_repo|cross_check",
+            "evidence": "Trecho curto que prova relevancia",
+            "notes": "Observacao de atualidade/autoridade"
+          }
+        }
+      ],
+      "advancement_check": "Pergunta socratica binaria",
+      "progress": {
+        "trackable": true,
+        "default_status": "not_started"
+      },
+      "declared_gaps": []
+    }
+  ],
+  "resources": [
+    {
+      "id": "resource-id",
+      "type": "video|reading|audio|tutorial_lab|recent_community|book",
+      "title": "Titulo",
+      "url": "https://...",
+      "source": "YouTube|Docs|Podcast|Reddit|Livro",
+      "author": "Autor/canal",
+      "published_at": "YYYY-MM-DD|null",
+      "duration_minutes": 12,
+      "status": "approved|rejected|backup|weak_signal",
+      "decision_reason": "Motivo curto da decisao",
+      "validation": {
+        "methods": ["youtube_transcript|youtube_chapters|description|content_fetch|toc|show_notes|slides_repo|cross_check|not_validated"],
+        "evidence": ["Trecho curto quando houver"],
+        "checked_at": "YYYY-MM-DD",
+        "notes": "Observacao de atualidade/autoridade"
+      },
+      "recommendation": {
+        "role": "primary_nerve|additional|inventory_only",
+        "recommended_for_more_study": true
+      }
+    }
+  ],
+  "boss_final": [
+    {
+      "type": "Conceitual",
+      "question": "Pergunta"
+    }
+  ],
+  "additional_resources": [
+    {
+      "resource_id": "resource-id",
+      "reason": "Por que ficou fora dos nervos principais"
+    }
+  ],
+  "next_steps": [],
+  "audit": {
+    "inspected": 0,
+    "approved": 0,
+    "rejected": 0,
+    "backup": 0,
+    "weak_signals": 0,
+    "resources_by_modality": {
+      "readings": 0,
+      "videos": 0,
+      "audio_podcasts": 0,
+      "tutorials_labs": 0,
+      "recent_community": 0,
+      "books": 0
+    },
+    "youtube_validated": 0,
+    "declared_gaps": []
+  }
+}
