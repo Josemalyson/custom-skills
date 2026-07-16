@@ -1,0 +1,88 @@
+{
+  "base_placeholders": [
+    "{1 linha do porquê}",
+    "{Canal/Autor}",
+    "{Duração/Tipo}",
+    "{M}",
+    "{N}",
+    "{O que você vai conseguir fazer ao final — 3 a 5 linhas de habilidades concretas}",
+    "{Parágrafo narrativo de 3–6 linhas. Conecta com a estação anterior e termina com tensão.}",
+    "{Pergunta socrática binária}",
+    "{Pergunta}",
+    "{Próximo tópico}",
+    "{Título do Recurso}",
+    "{Título estação 1}",
+    "{Título narrativo}",
+    "{Título}",
+    "{X}",
+    "{Y}",
+    "{contexto}",
+    "{idioma}",
+    "{level}",
+    "{total_inspecionados}",
+    "{trecho curto}",
+    "{trecho}",
+    "{url}"
+  ],
+  "files": {
+    "TEMPLATE_OFFLINE.html": {
+      "bytes": 104760,
+      "semantic_placeholders": 23,
+      "same_placeholder_contract": true,
+      "duplicate_ids": [],
+      "broken_internal_links": [],
+      "buttons_without_type": 0,
+      "external_links_without_rel": [],
+      "scripts": [
+        {
+          "index": 0,
+          "type": "classic",
+          "ok": true,
+          "stderr": ""
+        },
+        {
+          "index": 1,
+          "type": "classic",
+          "ok": true,
+          "stderr": ""
+        }
+      ],
+      "external_origins": []
+    },
+    "TEMPLATE_ENHANCED.html": {
+      "bytes": 115507,
+      "semantic_placeholders": 23,
+      "same_placeholder_contract": true,
+      "duplicate_ids": [],
+      "broken_internal_links": [],
+      "buttons_without_type": 0,
+      "external_links_without_rel": [],
+      "scripts": [
+        {
+          "index": 0,
+          "type": "classic",
+          "ok": true,
+          "stderr": ""
+        },
+        {
+          "index": 1,
+          "type": "classic",
+          "ok": true,
+          "stderr": ""
+        },
+        {
+          "index": 2,
+          "type": "module",
+          "ok": true,
+          "stderr": ""
+        }
+      ],
+      "external_origins": [
+        "cdn.jsdelivr.net",
+        "esm.sh",
+        "fonts.googleapis.com",
+        "fonts.gstatic.com"
+      ]
+    }
+  }
+}
