@@ -4,11 +4,11 @@
 
 | # | Categoria | Ferramenta | Comando base |
 |---|-----------|-----------|--------------|
-| 1 | Formatter | `gofmt` | `gofmt -l ./... \| grep -v pb/ \| grep -v .pb.go` |
+| 1 | Formatter | `gofmt` | `gofmt -l . \| grep -v '^pb/' \| grep -v '\.pb\.go$'` (falha se houver saída) |
 | 2 | Linter | `golangci-lint` | `golangci-lint run ./...` |
 | 3 | Security | `govulncheck` | `govulncheck ./...` |
 | 4 | Dead code | `deadcode` | `deadcode -test ./...` |
-| 5 | Modernizer | `modernize` | `modernize -diff ./... 2>&1 \| grep -v pb/` |
+| 5 | Modernizer | `modernize` | `modernize -diff ./... 2>&1 \| grep -v pb/` (warn só se a saída não for vazia) |
 | 6 | Conventions | custom grep/AST | ver secao abaixo |
 | 7 | Module hygiene | `go mod tidy` | `go mod tidy && git diff --exit-code go.mod go.sum` |
 | 8 | Tests + cov | `go test` | `go test -coverprofile=coverage.out ./...` |
@@ -40,6 +40,43 @@ brew install k6               # macOS
 brew install bufbuild/buf/buf
 go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+```
+
+---
+
+## Step 0 — Branch name
+
+O regex vem do `AGENTS.md`/`CONVENTIONS.md` quando o projeto define um padrão; o Git Flow do template é só o fallback.
+
+```bash
+# Ex.: AGENTS.md pede <tipo>/S-NNN-<slug> (aceita feat/S-001-consulta-saldo)
+VALID_BRANCH_REGEX="^(feat|fix|docs|chore|refactor|test)\/S-[0-9]{3,}-[a-z0-9._-]+$|^main$"
+```
+
+---
+
+## Step 1 — Formatter
+
+`gofmt` recebe caminhos, não padrões de pacote: `gofmt -l ./...` falha com `lstat ./...`. Use `.` e falhe se a lista vier preenchida.
+
+```bash
+UNFORMATTED=$(gofmt -l . | grep -v '^pb/' | grep -v '\.pb\.go$' || true)
+if [[ -n "$UNFORMATTED" ]]; then
+  echo "$UNFORMATTED"
+  fail "gofmt: arquivos fora do padrão (rode gofmt -w nos arquivos acima)"
+fi
+pass "gofmt"
+```
+
+---
+
+## Step 5 — Modernizer (report-only)
+
+`cmd | grep -v pb/ || warn` dá `[WARN]` também quando não há sugestão (o `grep` sai com 1 em saída vazia). Capture e avise só se houver saída.
+
+```bash
+MODERN=$(modernize -diff ./... 2>&1 | grep -v pb/ || true)
+if [[ -n "$MODERN" ]]; then echo "$MODERN"; warn "modernize: idioms modernos disponíveis (non-blocking)"; else pass "modernize"; fi
 ```
 
 ---
@@ -241,6 +278,16 @@ has_docker()     { docker info &>/dev/null 2>&1; }
 has_cgo()        {  "$(go env CGO_ENABLED)" == "1" ; }
 has_goproxy()    { curl -sf --max-time 3 "${GOPROXY%%,*}" &>/dev/null; }
 has_aws_creds()  {  -n "${AWS_ACCESS_KEY_ID:-}" && -n "${AWS_SECRET_ACCESS_KEY:-}" ; }
+has_go_pkgs()    { [[ -n "$(go list ./... 2>/dev/null)" ]]; }
+```
+
+Enquanto o módulo só tem `go.mod` (repositório recém-criado), golangci-lint, govulncheck, deadcode, modernize, `go mod tidy` e `go test` falham com "no packages"/"no go files". Os steps 2–5 e 7–9 fazem `[SKIP]` nesse caso:
+
+```bash
+if ! has_go_pkgs; then skip "golangci-lint — módulo ainda sem pacote Go"; else
+  golangci-lint run ./... || fail "golangci-lint reportou violações"
+  pass "golangci-lint"
+fi
 ```
 
 ---

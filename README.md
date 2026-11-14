@@ -301,7 +301,7 @@ custom-skills/
     │   ├── ferramentas.md              # Tools the skill uses
     │   └── pre-commit-quality-gate-doc.md  # Worked example (Go + gRPC)
     └── scripts/
-        └── template.sh                 # Parameterized pipeline (178 lines)
+        └── template.sh                 # Parameterized pipeline (186 lines)
 ```
 
 ---

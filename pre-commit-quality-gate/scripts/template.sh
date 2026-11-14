@@ -48,9 +48,11 @@ pass "Secret Scanner"
 # ── Step 0: Git Flow Branch Name ────────────────────────────
 step "0" "Branch Name — Validação Git Flow"
 BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "HEAD")
-VALID_BRANCH_REGEX="^(feature|bugfix|hotfix|release|support)\/[a-zA-Z0-9._-]+$|^(main|master|develop)$"
+# {{BRANCH_REGEX}}: padrão do AGENTS.md/CONVENTIONS.md quando existir; senão, o Git Flow:
+#   ^(feature|bugfix|hotfix|release|support)\/[a-zA-Z0-9._-]+$|^(main|master|develop)$
+VALID_BRANCH_REGEX="{{BRANCH_REGEX}}"
 if [[ "$BRANCH_NAME" != "HEAD" ]] && [[ ! "$BRANCH_NAME" =~ $VALID_BRANCH_REGEX ]]; then
-  fail "Nome da branch inválido: '$BRANCH_NAME'. Use o padrão Git Flow (feature/..., bugfix/..., hotfix/..., release/..., develop, main)."
+  fail "Nome da branch inválido: '$BRANCH_NAME'. Use o padrão {{BRANCH_PATTERN_DESC}}."
 fi
 pass "Branch Name"
 
@@ -80,7 +82,13 @@ pass "{{STEP_4_NAME}}"
 
 # ── Step 5: Modernizer (report-only) ───────────────────────
 step "5" "{{STEP_5_NAME}} — {{STEP_5_DESC}}"
-{{STEP_5_COMMAND}} || warn "{{STEP_5_NAME}}: idioms modernos disponíveis (non-blocking)"
+# report-only: warn só quando há sugestão (saída vazia = pass)
+MODERN_OUT=$({{STEP_5_COMMAND}} 2>&1 || true)
+if [[ -n "$MODERN_OUT" ]]; then
+  echo "$MODERN_OUT"; warn "{{STEP_5_NAME}}: idioms modernos disponíveis (non-blocking)"
+else
+  pass "{{STEP_5_NAME}}"
+fi
 
 # ── Step 6: Convention guards ───────────────────────────────
 step "6" "Convention guards — {{STEP_6_DESC}}"

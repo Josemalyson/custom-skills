@@ -65,7 +65,7 @@ Use `scripts/template.sh` as the structural base. Fill every `{{placeholder}}` w
 | # | Category | Purpose | Mode |
 |---|----------|---------|------|
 | -1 | Secret scanner | Credential leak prevention (Gitleaks) | fail |
-| 0 | Branch name | Git Flow / trunk-based pattern validation | fail |
+| 0 | Branch name | Pattern from `AGENTS.md`/`CONVENTIONS.md` when defined; Git Flow fallback | fail |
 | 1 | Formatter | Style normalization — eliminates diff noise | fail |
 | 2 | Linter | Static quality — bugs and bad practices | fail |
 | 3 | Security scan | Dependency vulnerabilities | fail (warn for stdlib) |
