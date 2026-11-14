@@ -1,10 +1,9 @@
 ---
 name: pre-commit-quality-gate
-description: >
-  Shift-left quality gate — fingerprints the project stack and generates a fail-fast
-  pre-commit pipeline automatically. Use when the user wants pre-commit hooks,
-  local quality gates, or CI at the commit boundary. Also when another skill needs
-  to enforce commit-time checks.
+description: "Shift-left quality gate: identifica a stack do projeto e gera automaticamente um pipeline de pre-commit fail-fast (do barato ao caro). Use quando pedirem hooks de pre-commit, quality gates locais ou CI na fronteira do commit, ou quando outra skill precisar impor checagens no commit."
+metadata:
+  category: qualidade
+  origem: propria
 ---
 
 # Pre-Commit Quality Gate
@@ -46,10 +45,10 @@ Read the matching reference file from this skill's directory:
 
 | Language | File |
 |----------|------|
-| Go | `go.md` |
-| Python | `python.md` |
-| Node.js / TypeScript | `nodejs.md` |
-| Java / Kotlin | `java.md` |
+| Go | `references/go.md` |
+| Python | `references/python.md` |
+| Node.js / TypeScript | `references/nodejs.md` |
+| Java / Kotlin | `references/java.md` |
 
 Multi-language projects: load all matching references and merge tool mappings.
 
@@ -59,7 +58,7 @@ Resolve a concrete tool for each of the 14 categories. Where no equivalent exist
 
 ## Step 3 — Generate the pipeline
 
-Use `template.sh` as the structural base. Fill every `{{placeholder}}` with tools from the fingerprint + reference.
+Use `scripts/template.sh` as the structural base. Fill every `{{placeholder}}` with tools from the fingerprint + reference.
 
 ### The 14 categories
 
@@ -92,39 +91,9 @@ Use `template.sh` as the structural base. Fill every `{{placeholder}}` with tool
 - Log format: `[STEP N/14]`, `[SKIP]`, `[WARN]`, `[PASS]`, `[FAIL]`
 - Adopt thresholds from existing configs; fall back to defaults only when none found (coverage: 90%, mutation: 70%, p95 < 200ms)
 
-### Convention guards (step 6)
+### Convention guards and SKIP vars
 
-If `AGENTS.md` or `CONVENTIONS.md` exists, extract rules and encode as grep checks. Otherwise generate commented placeholders with common patterns for the detected language.
-
-Four rule types:
-1. **Prohibited patterns** — banned calls (`console.log`, `print()`, global loggers)
-2. **Required patterns** — every handler has injected logger, every endpoint has auth
-3. **Config sync** — env-keys consistent across environments
-4. **Architectural invariants** — domain doesn't import infra
-
-### SKIP var conventions
-
-```bash
-# SKIP pattern (ON by default, =1 disables)
-SKIP_SECURITY=${SKIP_SECURITY:-0}
-SKIP_RACE=${SKIP_RACE:-0}
-SKIP_INTEGRATION=${SKIP_INTEGRATION:-0}
-SKIP_MUTATION=${SKIP_MUTATION:-0}
-SKIP_PERF=${SKIP_PERF:-0}
-SKIP_SCHEMA=${SKIP_SCHEMA:-0}
-
-# ENABLE pattern (OFF by default, =0 enables) — INVERTED semantics
-SKIP_DOCKER=${SKIP_DOCKER:-1}
-```
-
-Soft-skip pattern for infrastructure dependencies:
-
-```bash
-if ! docker info &>/dev/null 2>&1; then
-  echo "[WARN] Docker unavailable — step N soft-skipped"
-  # continue, do not exit 1
-fi
-```
+Before writing the script, read [`references/script-conventions.md`](references/script-conventions.md): how to encode `AGENTS.md`/`CONVENTIONS.md` rules as grep checks (step 6), the SKIP/ENABLE var conventions (`SKIP_DOCKER` is inverted) and the soft-skip pattern for infrastructure dependencies.
 
 **Completion criterion**: `.githooks/pre-commit` and `.githooks/commit-msg` generated with all placeholders resolved — no `{{...}}` remaining. Scripts are syntactically valid bash (`bash -n .githooks/pre-commit` passes).
 
@@ -147,8 +116,10 @@ fi
 
 ## References
 
-- `go.md` — Go tool mapping
-- `python.md` — Python tool mapping
-- `nodejs.md` — Node.js / TypeScript tool mapping
-- `java.md` — Java / Kotlin tool mapping
-- `template.sh` — Parameterized script base
+- `references/go.md` — Go tool mapping
+- `references/python.md` — Python tool mapping
+- `references/nodejs.md` — Node.js / TypeScript tool mapping
+- `references/java.md` — Java / Kotlin tool mapping
+- `references/script-conventions.md` — Convention guards, SKIP vars, soft-skip
+- `references/pre-commit-quality-gate-doc.md` — Worked example (Go + gRPC)
+- `scripts/template.sh` — Parameterized script base

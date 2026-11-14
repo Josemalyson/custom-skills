@@ -177,9 +177,9 @@ Comando no hook:
 
 ```bash
 MVN_CMD="./mvnw"
-[[ ! -f ./mvnw ]] && MVN_CMD="mvn"
+ ! -f ./mvnw  && MVN_CMD="mvn"
 SETTINGS_ARG=""
-[[ -f settings.xml ]] && SETTINGS_ARG="-s settings.xml"
+ -f settings.xml  && SETTINGS_ARG="-s settings.xml"
 
 $MVN_CMD test jacoco:check $SETTINGS_ARG
 ```

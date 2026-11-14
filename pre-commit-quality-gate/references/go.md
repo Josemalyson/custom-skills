@@ -62,7 +62,7 @@ fi
 # ── Sincronização de env-keys entre ambientes ─────────────────
 DEV_KEYS=$(grep -oP 'os\.Getenv\("\K[^"]+' config/dev.go 2>/dev/null | sort)
 PROD_KEYS=$(grep -oP 'os\.Getenv\("\K[^"]+' config/prod.go 2>/dev/null | sort)
-if [[ "$DEV_KEYS" != "$PROD_KEYS" ]]; then
+if  "$DEV_KEYS" != "$PROD_KEYS" ; then
   echo "[FAIL] Env-keys fora de sincronia entre dev e prod"
   diff <(echo "$DEV_KEYS") <(echo "$PROD_KEYS")
   exit 1
@@ -221,7 +221,7 @@ export default function () {
 ```bash
 SCHEMA_STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep '\.proto$' || true)
 
-if [[ -n "$SCHEMA_STAGED" ]]; then
+if  -n "$SCHEMA_STAGED" ; then
   echo "Proto files staged: $SCHEMA_STAGED"
   buf generate
   git add .
@@ -238,9 +238,9 @@ fi
 
 ```bash
 has_docker()     { docker info &>/dev/null 2>&1; }
-has_cgo()        { [[ "$(go env CGO_ENABLED)" == "1" ]]; }
+has_cgo()        {  "$(go env CGO_ENABLED)" == "1" ; }
 has_goproxy()    { curl -sf --max-time 3 "${GOPROXY%%,*}" &>/dev/null; }
-has_aws_creds()  { [[ -n "${AWS_ACCESS_KEY_ID:-}" && -n "${AWS_SECRET_ACCESS_KEY:-}" ]]; }
+has_aws_creds()  {  -n "${AWS_ACCESS_KEY_ID:-}" && -n "${AWS_SECRET_ACCESS_KEY:-}" ; }
 ```
 
 ---

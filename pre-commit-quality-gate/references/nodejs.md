@@ -98,7 +98,7 @@ npx stryker run
 SCORE=$(cat reports/mutation/mutation.json | \
   node -e "const d=require('/dev/stdin'); \
   console.log(Math.round(d.metrics.mutationScore))")
-if [[ "$SCORE" -lt 70 ]]; then
+if  "$SCORE" -lt 70 ; then
   echo "[FAIL] Mutation score ${SCORE}% abaixo de 70%"
   exit 1
 fi

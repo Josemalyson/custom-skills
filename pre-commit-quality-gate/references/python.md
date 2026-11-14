@@ -48,7 +48,7 @@ fi
 # Verificar sync de env-keys entre settings
 DEV=$(grep -oP "os\.getenv\(['\"]?\K[A-Z_]+" src/config/dev.py | sort)
 PROD=$(grep -oP "os\.getenv\(['\"]?\K[A-Z_]+" src/config/prod.py | sort)
-if [[ "$DEV" != "$PROD" ]]; then
+if  "$DEV" != "$PROD" ; then
   echo "[FAIL] Env-keys fora de sincronia entre dev e prod"
   diff <(echo "$DEV") <(echo "$PROD")
   exit 1
@@ -78,7 +78,7 @@ mutmut run --paths-to-mutate src/ --tests-dir tests/
 SURVIVED=$(mutmut results | grep -c "survived" || true)
 TOTAL=$(mutmut results | grep -cE "survived|killed" || true)
 
-if [[ "$TOTAL" -gt 0 ]]; then
+if  "$TOTAL" -gt 0 ; then
   SCORE=$(echo "scale=1; (($TOTAL - $SURVIVED) * 100) / $TOTAL" | bc)
   if (( $(echo "$SCORE < 70" | bc -l) )); then
     echo "[FAIL] Mutation score ${SCORE}% abaixo de 70%"

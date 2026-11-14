@@ -291,13 +291,17 @@ custom-skills/
 │   └── LICENSE.txt                     # MIT License
 │
 └── pre-commit-quality-gate/
-    ├── SKILL.md                        # Skill definition (154 lines)
-    ├── template.sh                     # Parameterized pipeline (178 lines)
-    ├── pre-commit-quality-gate-doc.md  # Detailed documentation
-    ├── go.md                           # Go tool mappings
-    ├── python.md                       # Python tool mappings
-    ├── nodejs.md                       # Node.js tool mappings
-    └── java.md                         # Java tool mappings
+    ├── SKILL.md                        # Skill definition (125 lines)
+    ├── references/
+    │   ├── go.md                       # Go tool mappings
+    │   ├── python.md                   # Python tool mappings
+    │   ├── nodejs.md                   # Node.js tool mappings
+    │   ├── java.md                     # Java tool mappings
+    │   ├── script-conventions.md       # Convention guards, SKIP vars, soft-skip
+    │   ├── ferramentas.md              # Tools the skill uses
+    │   └── pre-commit-quality-gate-doc.md  # Worked example (Go + gRPC)
+    └── scripts/
+        └── template.sh                 # Parameterized pipeline (178 lines)
 ```
 
 ---
